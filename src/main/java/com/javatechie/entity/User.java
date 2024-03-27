@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Date;
+import java.util.List;
 
-@Table(name = "users")
+@Table(name = "user")
 @Entity
 @Data
 public class User {
@@ -16,6 +17,8 @@ public class User {
     private String username;
     @Column(name = "name")
     private String name;
+    @Column(name = "email")
+    private String email;
     @Column(name = "password")
     private String password;
     @Column(name = "address")
@@ -26,4 +29,17 @@ public class User {
     private Date modifiedDate;
     @Column(name = "roles")
     private String roles;
+    @Column(name = "deleted")
+    private Integer deleted;
+
+    @OneToMany(mappedBy = "user")
+    private List<CartEntity> carts;
+    @OneToMany(mappedBy = "user")
+    List<OrderEntity> orders;
+    @OneToMany(mappedBy = "user")
+    List<ReviewEntity> reviews;
+    @OneToMany(mappedBy = "user")
+    private List<NotificationEntity> notifies;
+    @OneToMany(mappedBy = "user")
+    private List<UserVoucherEntity> userVouchers;
 }

@@ -3,11 +3,12 @@ package com.javatechie.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity
-@Table(name = "payment")
-@Data
-public class PaymentEntity {
+import java.util.List;
 
+@Entity
+@Table(name = "category")
+@Data
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -16,6 +17,6 @@ public class PaymentEntity {
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
-    @OneToOne(mappedBy = "payment")
-    private OrderEntity order;
+    @OneToMany(mappedBy = "category")
+    private List<ItemDetailEntity> items;
 }

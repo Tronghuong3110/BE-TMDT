@@ -44,14 +44,19 @@ public class LoginController {
         }
     }
 
-    @PostMapping("/signup") // role == 0(employee), 1(admin), 2(admin + employee)
+    // đăng kí
+    @PostMapping("/signup") // role == 0(employee), 1(admin), 2(admin + employee), 3(user)
     public ResponseEntity<?> signIn(@RequestBody UserDto user, @RequestParam("role") Integer role) {
+        JSONObject response = new JSONObject();
         String responseSignUp = userService.addUser(user, role);
         if(responseSignUp.equals("Success")) {
-            return ResponseEntity.ok("Sign up account success");
+            response.put("code", 1);
+            response.put("message", "Sign up account success");
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.badRequest().body(responseSignUp);
+        response.put("code", 0);
+        response.put("message", responseSignUp);
+        return ResponseEntity.badRequest().body(response);
     }
-
 
 }

@@ -4,21 +4,23 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@Table(name = "cartItem")
 @Entity
-public class CartItemEntity {
+@Table(name = "item_invoice")
+public class ItemInvoiceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "quantity")
     private Integer quantity;
-//
-    @OneToOne
+    @Column(name = "import_price")
+    private Integer importPrice;
+
+    @ManyToOne
     @JoinColumn(name = "item_id")
     private ItemDetailEntity item;
 
     @ManyToOne
-    @JoinColumn(name = "cart_id")
-    private CartEntity cart;
+    @JoinColumn(name = "invoice_id")
+    private ImportInvoiceEntity invoice;
 }

@@ -1,17 +1,23 @@
 package com.javatechie.service.impl;
 
+import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.UserDto;
 import com.javatechie.entity.User;
 import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.service.IUserService;
 import com.javatechie.util.CheckPassWord;
 import com.javatechie.util.ConstUtil;
+import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService implements IUserService {
@@ -44,6 +50,7 @@ public class UserService implements IUserService {
                 userEntity.setRoles(checkRoles(role));
                 userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
                 userEntity.setCreateDate(new Date(System.currentTimeMillis()));
+                userEntity.setDeleted(0);
                 userInfoRepository.save(userEntity);
                 return "Success";
             }
@@ -56,121 +63,137 @@ public class UserService implements IUserService {
         return null;
     }
 
-//    @Override
-//    public List<UserDto> findAllUser(String role) {
-//        List<User> listUserEntity = userInfoRepository.findAllByRole(role);
-//        List<UserDto> listUserDto = new ArrayList<>();
-//        for(User user : listUserEntity) {
-//            UserDto userDto = UserConverter.toDto(user);
-//            if(userDto != null) {
-//                listUserDto.add(userDto);
-//            }
-//        }
-//        return listUserDto;
-//    }
-//
-//    @Override
-//    public UserDto findOneUser(Integer id) {
-//        User user = userInfoRepository.findById(id).orElse(null);
-//        if(user == null) {
-//            return null;
-//        }
-//        UserDto userDto = UserConverter.toDto(user);
-//        return userDto;
-//    }
-//
-//    @Override
-//    public UserDto updateUser(UserDto userDto, Integer role) {
-//        UserDto response = new UserDto();
-//        User user;
-//        try {
-//            if(role.equals(1)) { // TH là admin sửa thông tin của các employee
-//                user = userInfoRepository.findById(userDto.getId()).orElse(null);
-//            }
-//            else { // TH employee chỉnh sửa thông tin của bản thân
-//                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//                UserInfoUserDetails userDetails = (UserInfoUserDetails) auth.getPrincipal();
-//                user = userInfoRepository.findByUsername(userDetails.getUsername()).orElse(null);
-//                if(user == null || user.getId() != userDto.getId()) {
-//                    response.setMessage("You cannot change other employees of information!!");
-//                    return response;
-//                }
-//            }
-//            if(user == null) {
-//                response.setMessage("Can not found user!!");
-//                return response;
-//            }
-//            // thay mật khẩu user
-//            if(userDto.getPassword() != null) {
-//                String newPassword = userDto.getPassword();
-//                Boolean checkPassword = CheckPassWord.isStrongPassword(newPassword);
-//                if(!checkPassword) {
-//                    response.setMessage("Password is not valid");
-//                    return response;
-//                }
-//                user.setPassword(passwordEncoder.encode(newPassword));
-//                userInfoRepository.save(user);
-//                response.setMessage("Change password success!!");
-//                return response;
-//            }
-//            user = UserConverter.toEntity(user, userDto);
-//            if(user == null) {
-//                response.setMessage("Update info user error!!");
-//                return response;
-//            }
-//            user = userInfoRepository.save(user);
-//            response = UserConverter.toDto(user);
-//            response.setMessage("Update info user success");
-//            return response;
-//        }
-//        catch (Exception e) {
-//            response.setMessage("Update info user fail");
-//            e.printStackTrace();
-//            return response;
-//        }
-//    }
-//
-//    @Override
-//    public String deleteUser(Integer id) {
-//        try {
-//            List<Machine> listMachine = machineRepository.findAllByUserId(id);
-//            List<Machine> list = new ArrayList<>();
-//            for(Machine machine : listMachine) {
-//                machine.setUser(null);
-//                list.add(machine);
-//            }
-//            machineRepository.saveAll(list);
-//            userInfoRepository.deleteById(id);
-//            return "Success";
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//            return "failed";
-//        }
-//    }
-//
-//    @Override
-//    public UserDto getInfoUser() {
-//        try {
-//            UserDto responseUser = new UserDto();
-//            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//            UserInfoUserDetails userDetails = (UserInfoUserDetails) auth.getPrincipal();
-//            User user = userInfoRepository.findByUsername(userDetails.getUsername()).orElse(null);
-//            if(user == null) {
-//                responseUser.setMessage("Can not found info of you");
-//                return responseUser;
-//            }
-//            responseUser = UserConverter.toDto(user);
-//            return responseUser;
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//            System.out.println("Get info user error!!");
-//        }
-//        return null;
-//    }
+    @Override
+    public List<UserDto> findAllUser() {
+        try {
+            List<User> listUserEntity = userInfoRepository.findAllByDeleted(0);
+            List<UserDto> listUserDto = new ArrayList<>();
+            for(User user : listUserEntity) {
+                UserDto userDto = new UserDto();
+                BeanUtils.copyProperties(user, userDto);
+                userDto.setPassword(null);
+                listUserDto.add(userDto);
+            }
+            return listUserDto;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-    // kiểm tra email có tồn tại không
+    @Override
+    public JSONObject findOneUserById(Integer id) {
+        JSONObject response = new JSONObject();
+        try {
+            UserDto userDto = new UserDto();
+            User user = userInfoRepository.findByIdAndDeleted(id, 0).orElse(null);
+            if(user == null) {
+                response.put("code", 0);
+                response.put("message", "Can not found user");
+                return response;
+            }
+            BeanUtils.copyProperties(user, userDto);
+            response.put("code", 1);
+            response.put("message", userDto);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 1);
+            response.put("message", "Get info user error");
+        }
+        return response;
+    }
+
+    @Override
+    public JSONObject getInfoOfUser() {
+        JSONObject response = new JSONObject();
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserInfoUserDetails userDetails = (UserInfoUserDetails) auth.getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(null);
+            UserDto userDto = new UserDto();
+            if(user == null) {
+                response.put("code", 0);
+                response.put("message", "Can not found user");
+                return response;
+            }
+            BeanUtils.copyProperties(user, userDto);
+            response.put("code", 1);
+            response.put("message", userDto);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 1);
+            response.put("message", "Get info user error");
+        }
+        return response;
+    }
+
+    @Override
+    public JSONObject updateUser(UserDto userDto) {
+        JSONObject response = new JSONObject();
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserInfoUserDetails userInfo = (UserInfoUserDetails) auth.getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(null);
+            if(user == null || !user.getId().equals(userDto.getId())) {
+                response.put("code", 0);
+                response.put("message", "Can not change information of user");
+                return response;
+            }
+            user = convertFromDtoToEntity(userDto, user);
+            if(user == null) {
+                response.put("code", 0);
+                response.put("message", "Can not change information");
+                return response;
+            }
+            if (userDto.getPassword() != null) {
+                Boolean checkPassword = CheckPassWord.isStrongPassword(userDto.getPassword());
+                if(!checkPassword) {
+                    response.put("code", 0);
+                    response.put("message", "Password invalidate");
+                    return response;
+                }
+            }
+            user.setModifiedDate(new Date(System.currentTimeMillis()));
+            userInfoRepository.save(user);
+            response.put("code", 1);
+            response.put("message", "Change information success");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", e.getMessage());
+        }
+        return response;
+    }
+
+    @Override
+    public JSONObject deleteUser(Integer id) {
+        JSONObject response = new JSONObject();
+        try {
+            User user = userInfoRepository.findByIdAndDeleted(id, 0).orElse(null);
+            if(user == null) {
+                response.put("code", 0);
+                response.put("message", "Can not found user with id = " + id);
+                return response;
+            }
+            user.setDeleted(1);
+            userInfoRepository.save(user);
+            response.put("code", 1);
+            response.put("message", "Delete account user success");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Delete account user fail");
+        }
+        return response;
+    }
+
+
+    // kiểm tra username có tồn tại không
     private Boolean checkUsernameExist(String username) {
         return userInfoRepository.existsByUsername(username);
     }
@@ -183,9 +206,31 @@ public class UserService implements IUserService {
         else if (role == 0) { // role == 0 ==> employee
             roleStr = ConstUtil.ROLE_EMPLOYEE;
         }
-        else { // role == 2 ==> admin + employee
+        else if(role == 2) { // role == 2 ==> admin + employee
             roleStr = ConstUtil.ROLE_ADMIN + ", " + ConstUtil.ROLE_EMPLOYEE;
         }
+        else { // role == 3 ==> user
+            roleStr = ConstUtil.ROLE_USER;
+        }
         return roleStr;
+    }
+
+    private User convertFromDtoToEntity(UserDto userDto, User user) {
+        try {
+            if(userDto.getName() != null) {
+                user.setName(userDto.getName());
+            }
+            if(userDto.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            }
+            if(userDto.getAddress() != null) {
+                user.setAddress(userDto.getAddress());
+            }
+            return user;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
