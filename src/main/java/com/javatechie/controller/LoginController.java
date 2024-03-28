@@ -27,20 +27,24 @@ public class LoginController {
     // đăng nhập
     @PostMapping("/login")
     public ResponseEntity<?> authenticateAndGetToken(@RequestBody UserDto userDto){
+        JSONObject jsonObject = new JSONObject();
         try {
             Authentication authentication = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(userDto.getUsername(), userDto.getPassword()));
             if (authentication.isAuthenticated()) {
                 UserInfoUserDetails userDetails = (UserInfoUserDetails) authentication.getPrincipal();
-                JSONObject jsonObject = new JSONObject();
                 jsonObject.put("token", jwtService.generateToken(userDto.getUsername()));
                 jsonObject.put("role", userDetails.getRoles());
                 return ResponseEntity.ok(jsonObject);
             }
-            return ResponseEntity.badRequest().body("Invalid user request !");
+            jsonObject.put("code", 0);
+            jsonObject.put("token", "Invalid user request!");
+            return ResponseEntity.badRequest().body(jsonObject);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Tài khoản hoặc mật khất không chính xác");
+            jsonObject.put("code", 0);
+            jsonObject.put("token", "Tài khoản hoặc mật khất không chính xác");
+            return ResponseEntity.badRequest().body(jsonObject);
         }
     }
 

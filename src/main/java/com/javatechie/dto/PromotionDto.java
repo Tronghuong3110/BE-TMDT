@@ -13,7 +13,7 @@ public class PromotionDto {
     private String content;
     private Date dateStart;
     private Date dateEnd;
-    private Integer discount; // giam bao nhiêu %
-    private Integer discountConditions;
+    private Integer discount; // giảm bao nhiêu %
+    private Integer deleted;
     private List<Integer> idItems = new ArrayList<>();
 }

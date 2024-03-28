@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "accessory")
-public class AccessoryEntity extends ItemDetailEntity{
+public class AccessoryEntity extends ItemEntity{
     @Column(name = "weight")
     private String weight;
     @Column(name = "connect_type")

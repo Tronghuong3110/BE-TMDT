@@ -22,8 +22,7 @@ public class ReviewEntity {
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    private ItemDetailEntity item;
-
+    private ItemEntity item;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

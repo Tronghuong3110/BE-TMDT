@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "laptop")
-public class LapTopEntity extends ItemDetailEntity{
+public class LapTopEntity extends ItemEntity{
     @Column(name = "cpu")
     private String cpu;
     @Column(name = "card")

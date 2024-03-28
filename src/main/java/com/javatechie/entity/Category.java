@@ -18,5 +18,5 @@ public class Category {
     private String description;
 
     @OneToMany(mappedBy = "category")
-    private List<ItemDetailEntity> items;
+    private List<ItemEntity> items;
 }

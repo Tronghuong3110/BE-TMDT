@@ -38,14 +38,7 @@ public class ItemDetailEntity {
     @ManyToOne
     @JoinColumn(name = "promotion_id")
     private PromotionEntity promotion;
-    @OneToMany(mappedBy = "item")
-    private List<ReviewEntity> reviews;
     @OneToOne(mappedBy = "item")
     private CartItemEntity cartItem;
-    @ManyToOne
-    @JoinColumn(name = "brand_id")
-    private Brand brand;
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+
 }

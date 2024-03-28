@@ -23,4 +23,12 @@ public class ItemEntity {
     private List<ItemDetailEntity> itemDetails;
     @OneToMany(mappedBy = "itemEntity")
     private List<ImageEntity> images;
+    @OneToMany(mappedBy = "item")
+    private List<ReviewEntity> reviews;
+    @ManyToOne
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 }

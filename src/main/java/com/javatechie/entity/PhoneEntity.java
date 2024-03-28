@@ -8,7 +8,7 @@ import lombok.Data;
 @Entity
 @Table(name = "phone")
 @Data
-public class PhoneEntity extends ItemDetailEntity{
+public class PhoneEntity extends ItemEntity{
     @Column(name = "cpu")
     private String cpu;
     @Column(name = "frequency_screen")
