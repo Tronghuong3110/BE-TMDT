@@ -1,7 +1,7 @@
 package com.javatechie.service.impl;
 
 import com.javatechie.dto.CategoryDto;
-import com.javatechie.entity.Category;
+import com.javatechie.entity.CategoryEntity;
 import com.javatechie.repository.CategoryRepository;
 import com.javatechie.service.ICategoryService;
 import org.json.simple.JSONObject;
@@ -22,15 +22,15 @@ public class CategoryService implements ICategoryService {
     public JSONObject saveCategory(CategoryDto categoryDto) {
         JSONObject response = new JSONObject();
         try {
-            Category category = new Category();
-            BeanUtils.copyProperties(categoryDto, category);
+            CategoryEntity categoryEntity = new CategoryEntity();
+            BeanUtils.copyProperties(categoryDto, categoryEntity);
             Boolean checkExistCode = categoryRepository.existsByName(categoryDto.getName());
             if(checkExistCode) {
                 response.put("code", 0);
                 response.put("message", "Code has been duplicated");
                 return response;
             }
-            categoryRepository.save(category);
+            categoryRepository.save(categoryEntity);
             response.put("code", 1);
             response.put("message", "Add category success");
         }
@@ -45,11 +45,11 @@ public class CategoryService implements ICategoryService {
     @Override
     public List<CategoryDto> findAll() {
         try {
-            List<Category> categories = categoryRepository.findAll();
+            List<CategoryEntity> categories = categoryRepository.findAll();
             List<CategoryDto> listResponse = new ArrayList<>();
-            for(Category category : categories) {
+            for(CategoryEntity categoryEntity : categories) {
                 CategoryDto categoryDto = new CategoryDto();
-                BeanUtils.copyProperties(category, categoryDto);
+                BeanUtils.copyProperties(categoryEntity, categoryDto);
                 listResponse.add(categoryDto);
             }
             return listResponse;
@@ -64,14 +64,14 @@ public class CategoryService implements ICategoryService {
     public JSONObject findOneById(Integer id) {
         JSONObject response = new JSONObject();
         try {
-            Category category = categoryRepository.findById(id).orElse(null);
-            if(category == null) {
+            CategoryEntity categoryEntity = categoryRepository.findById(id).orElse(null);
+            if(categoryEntity == null) {
                 response.put("code", 0);
                 response.put("message", "Can not found category with id = " + id);
                 return response;
             }
             CategoryDto categoryDto = new CategoryDto();
-            BeanUtils.copyProperties(category, categoryDto);
+            BeanUtils.copyProperties(categoryEntity, categoryDto);
             response.put("code", 1);
             response.put("message", categoryDto);
         }
@@ -87,18 +87,18 @@ public class CategoryService implements ICategoryService {
     public JSONObject updateCategory(CategoryDto categoryDto) {
         JSONObject response = new JSONObject();
         try {
-            Category category = categoryRepository.findById(categoryDto.getId()).orElse(null);
-            if(category == null) {
+            CategoryEntity categoryEntity = categoryRepository.findById(categoryDto.getId()).orElse(null);
+            if(categoryEntity == null) {
                 response.put("code", 0);
                 response.put("message", "Can not found category with id = " + categoryDto.getId());
             }
-            category = convertToEntity(category, categoryDto);
-            if(category == null) {
+            categoryEntity = convertToEntity(categoryEntity, categoryDto);
+            if(categoryEntity == null) {
                 response.put("code", 0);
                 response.put("message", "Can not change information of category with id = " + categoryDto.getId());
                 return response;
             }
-            categoryRepository.save(category);
+            categoryRepository.save(categoryEntity);
             response.put("code", 1);
             response.put("message", "Update category success");
         }
@@ -126,15 +126,15 @@ public class CategoryService implements ICategoryService {
         return response;
     }
 
-    private Category convertToEntity(Category category, CategoryDto categoryDto) {
+    private CategoryEntity convertToEntity(CategoryEntity categoryEntity, CategoryDto categoryDto) {
         try {
             if(categoryDto.getName() != null) {
-                category.setName(category.getName());
+                categoryEntity.setName(categoryEntity.getName());
             }
             if(categoryDto.getDescription() != null) {
-                category.setDescription(categoryDto.getDescription());
+                categoryEntity.setDescription(categoryDto.getDescription());
             }
-            return category;
+            return categoryEntity;
         }
         catch (Exception e) {
             e.printStackTrace();

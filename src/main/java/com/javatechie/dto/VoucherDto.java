@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.security.PrivateKey;
+import java.util.List;
 
 @Data
 public class VoucherDto {
@@ -14,4 +15,5 @@ public class VoucherDto {
     private Integer discountConditions;
     private Integer numberVoucher;
     private Integer deleted;
+    List<Integer> idItems;
 }

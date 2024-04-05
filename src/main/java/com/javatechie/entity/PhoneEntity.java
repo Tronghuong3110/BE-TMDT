@@ -18,7 +18,7 @@ public class PhoneEntity extends ItemEntity{
     @Column(name = "rear_camera")
     private String rearCamera;
     @Column(name = "sim_number")
-    private Integer simNumber;
+    private String simNumber;
     @Column(name = "battery_capacity")
     private String batteryCapacity;
 }

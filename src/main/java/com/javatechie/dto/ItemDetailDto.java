@@ -11,7 +11,7 @@ public class ItemDetailDto {
     private Integer soldNumber;
     private Double price;
     private Integer quantity;
-    private Float screenSize;
-    private Integer diskSize;
-    private Integer ram;
+    private String screenSize;
+    private String diskSize;
+    private String ram;
 }

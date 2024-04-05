@@ -18,6 +18,8 @@ public class ItemEntity {
     private String name;
     @Column(name = "description")
     private String description;
+    @Column(name = "deleted")
+    private Integer deleted;
 
     @OneToMany(mappedBy = "item")
     private List<ItemDetailEntity> itemDetails;
@@ -27,8 +29,8 @@ public class ItemEntity {
     private List<ReviewEntity> reviews;
     @ManyToOne
     @JoinColumn(name = "brand_id")
-    private Brand brand;
+    private BrandEntity brand;
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private Category category;
+    private CategoryEntity category;
 }

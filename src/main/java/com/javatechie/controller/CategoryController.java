@@ -1,7 +1,6 @@
 package com.javatechie.controller;
 
 import com.javatechie.dto.CategoryDto;
-import com.javatechie.entity.Category;
 import com.javatechie.service.ICategoryService;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

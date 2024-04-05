@@ -6,10 +6,9 @@ import lombok.Data;
 import java.util.List;
 
 @Entity
-@Table(name = "brand")
+@Table(name = "category")
 @Data
-public class Brand {
-
+public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -17,7 +16,9 @@ public class Brand {
     private String name;
     @Column(name = "description", columnDefinition = "text")
     private String description;
+    @Column(name = "code")
+    private String code;
 
-    @OneToMany(mappedBy = "brand")
+    @OneToMany(mappedBy = "category")
     private List<ItemEntity> items;
 }

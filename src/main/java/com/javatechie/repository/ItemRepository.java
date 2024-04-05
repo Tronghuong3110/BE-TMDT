@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ItemRepository extends JpaRepository<ItemEntity, Integer> {
 
-//    Optional<ItemEntity> findByIdAndIs(Integer id, Integer deleted);
+    Optional<ItemEntity> findByIdAndDeleted(Integer id, Integer deleted);
 }

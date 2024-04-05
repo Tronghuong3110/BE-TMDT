@@ -23,11 +23,11 @@ public class ItemDetailEntity {
     @Column(name = "quantity")
     private Integer quantity;
     @Column(name = "screen_size")
-    private Float screenSize;
+    private String screenSize;
     @Column(name = "disk_size")
-    private Integer diskSize;
+    private String diskSize;
     @Column(name = "ram")
-    private Integer ram;
+    private String ram;
 
     @ManyToOne
     @JoinColumn(name = "item_id")
