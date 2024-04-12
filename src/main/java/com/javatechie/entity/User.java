@@ -31,6 +31,10 @@ public class User {
     private String roles;
     @Column(name = "deleted")
     private Integer deleted;
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    @Column(name = "dob")
+    private Date dob;
 
     @OneToMany(mappedBy = "user")
     private List<CartEntity> carts;

@@ -1,6 +1,5 @@
 package com.javatechie.dto;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 import java.sql.Date;
 
@@ -15,4 +14,6 @@ public class UserDto {
     private Date createDate;
     private Date modifiedDate;
     private String roles;
+    private String phoneNumber;
+    private Date dob;
 }

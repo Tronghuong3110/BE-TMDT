@@ -24,6 +24,8 @@ public class OrderEntity {
     private Double promotionMoney;
     @Column(name = "status") // trạng thái thanh toán
     private String status;
+    @Column(name = "address", columnDefinition = "text")
+    private String address;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")

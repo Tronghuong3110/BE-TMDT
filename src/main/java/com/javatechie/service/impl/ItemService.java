@@ -200,6 +200,39 @@ public class ItemService implements IItemService {
         }
     }
 
+    @Override
+    public List<ItemDto> findAllItem(Integer categoryId, Integer brandId, String key) {
+        List<ItemEntity> listItem = itemRepository.findAllByDeletedAndCategory_IdAndBrand_IdAndKey(categoryId, brandId, key);
+        List<ItemDto> listResponse = new ArrayList<>();
+        try {
+            for(ItemEntity item : listItem) {
+                ItemDto itemDto = new ItemDto();
+                BeanUtils.copyProperties(item, itemDto);
+                List<ItemDetailEntity> itemDetailEntities = item.getItemDetails();
+                List<ItemDetailDto> listItemDetail = new ArrayList<>();
+                for(ItemDetailEntity itemDetail : itemDetailEntities) {
+                    ItemDetailDto itemDetailDto = new ItemDetailDto();
+                    BeanUtils.copyProperties(itemDetail, itemDetailDto);
+                    listItemDetail.add(itemDetailDto);
+                }
+                itemDto.setItemDetails(listItemDetail);
+                List<ImageDto> listImage = new ArrayList<>();
+                for(ImageEntity image : item.getImages()) {
+                    ImageDto imageDto = new ImageDto();
+                    BeanUtils.copyProperties(image, imageDto);
+                    listImage.add(imageDto);
+                }
+                itemDto.setImages(listImage);
+                listResponse.add(itemDto);
+            }
+            return listResponse;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private <T extends ItemEntity> T saveNewItem(ItemDto itemDto, CategoryEntity category, BrandEntity brand, T item) {
 //        JSONObject response = new JSONObject();
         try {

@@ -128,6 +128,7 @@ public class PromotionService implements IPromotionService {
 
             // cập nhật lại danh sách sản phẩm được áp dụng khuyến mại
             promotion = promotionRepository.save(promotion);
+            List<String> listResponse = new ArrayList<>();
             if(promotionDto.getIdItems() != null) {
                 for(Integer idItem : promotionDto.getIdItems()) {
                     ItemDetailEntity item = itemDetailRepository.findByIdAndIsAvailable(idItem, true).orElse(null);
@@ -136,6 +137,7 @@ public class PromotionService implements IPromotionService {
                     }
                     item.setPromotion(promotion);
                     itemDetailRepository.save(item);
+                    listResponse.add("");
                 }
             }
             response.put("code", 1);

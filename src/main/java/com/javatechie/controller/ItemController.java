@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api")
 public class ItemController {
@@ -32,6 +35,15 @@ public class ItemController {
             return ResponseEntity.status(500).body("Can not found");
         }
         return ResponseEntity.ok(itemDto);
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<?> findAllItem(@RequestParam("categoryId") Optional<Integer> categoryId, @RequestParam("brandId") Optional<Integer> brandId, @RequestParam("key")Optional<String> key) {
+        List<ItemDto> listResponse = itemService.findAllItem(categoryId.orElse(null), brandId.orElse(null), key.orElse(null));
+        if(listResponse == null) {
+            return ResponseEntity.badRequest().body("Can not found item!!");
+        }
+        return ResponseEntity.ok(listResponse);
     }
 
     @PutMapping("/admin/item")
