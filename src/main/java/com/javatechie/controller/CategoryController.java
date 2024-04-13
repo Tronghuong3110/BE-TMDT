@@ -12,18 +12,17 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api")
 public class CategoryController {
     @Autowired
     private ICategoryService categoryService;
 
-    @GetMapping("/categories") // ok
+    @GetMapping("/api/categories") // ok
     public List<CategoryDto> findAllCategory() {
         List<CategoryDto> categories = categoryService.findAll();
         return categories;
     }
 
-    @GetMapping("/admin/category") // ok
+    @GetMapping("/admin/api/category") // ok
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> findOneById(@RequestParam("id") Integer id) {
         JSONObject response = categoryService.findOneById(id);
@@ -33,7 +32,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/admin/category") // ok
+    @PostMapping("/admin/api/category") // ok
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> saveCategory(@RequestBody CategoryDto categoryDto) {
         JSONObject response = categoryService.saveCategory(categoryDto);
@@ -43,7 +42,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/admin/category") // ok
+    @PutMapping("/admin/api/category") // ok
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateCategory(@RequestBody CategoryDto categoryDto) {
         JSONObject response = categoryService.updateCategory(categoryDto);
@@ -53,7 +52,7 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/category") // ok
+    @DeleteMapping("/admin/api/category") // ok
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteCategory(@RequestParam("id") Integer id) {
         JSONObject response = categoryService.deleteCategory(id);

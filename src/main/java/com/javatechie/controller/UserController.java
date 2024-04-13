@@ -13,13 +13,12 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api")
 public class UserController {
 
     @Autowired
     private IUserService userService;
 
-    @GetMapping("/admin/users") // ok
+    @GetMapping("/admin/api/users") // ok
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> findAllUser() {
         List<UserDto> listUser = userService.findAllUser();
@@ -28,7 +27,7 @@ public class UserController {
         }
         return ResponseEntity.ok(listUser);
     }
-    @GetMapping("/admin/user/{id}") // ok
+    @GetMapping("/admin/api/user/{id}") // ok
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> findOneUserById(@PathVariable("id") Integer id) {
         JSONObject response = userService.findOneUserById(id);
@@ -37,7 +36,7 @@ public class UserController {
         }
         return ResponseEntity.ok(response);
     }
-    @GetMapping("/user") // ok
+    @GetMapping("/api/user") // ok
     public ResponseEntity<?> getInfoUserLogin() {
         JSONObject response = userService.getInfoOfUser();
         if(response.get("code").equals(0)) {
@@ -45,7 +44,7 @@ public class UserController {
         }
         return ResponseEntity.ok(response);
     }
-    @PutMapping("/user") // ok
+    @PutMapping("/api/user") // ok
     public ResponseEntity<?> updateInfo(@RequestBody UserDto userDto) {
         JSONObject response = userService.updateUser(userDto);
         if(response.get("code").equals(0)) {
@@ -53,7 +52,7 @@ public class UserController {
         }
         return ResponseEntity.ok(response);
     }
-    @DeleteMapping("/admin/user") // ok
+    @DeleteMapping("/admin/api/user") // ok
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<?> deleteUser(@RequestParam("id") Integer id) {
         JSONObject response = userService.deleteUser(id);

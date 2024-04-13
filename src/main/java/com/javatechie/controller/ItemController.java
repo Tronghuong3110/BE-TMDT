@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@CrossOrigin("*")
 public class ItemController {
     @Autowired
     private IItemService itemService;
 
-    @PostMapping("/admin/item")
+    @PostMapping("/admin/api/item")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> saveItem(@RequestBody ItemDto itemDto, @RequestParam("categoryId")Integer categoryId, @RequestParam("brandId")Integer brandId) {
         JSONObject response = itemService.saveItem(itemDto, categoryId, brandId);
@@ -28,7 +28,7 @@ public class ItemController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/item")
+    @GetMapping("/api/item")
     public ResponseEntity<?> findOne(@RequestParam("id") Integer id) {
         ItemDto itemDto = itemService.findOneById(id);
         if(itemDto == null) {
@@ -37,7 +37,7 @@ public class ItemController {
         return ResponseEntity.ok(itemDto);
     }
 
-    @GetMapping("/items")
+    @GetMapping("/api/items")
     public ResponseEntity<?> findAllItem(@RequestParam("categoryId") Optional<Integer> categoryId, @RequestParam("brandId") Optional<Integer> brandId, @RequestParam("key")Optional<String> key) {
         List<ItemDto> listResponse = itemService.findAllItem(categoryId.orElse(null), brandId.orElse(null), key.orElse(null));
         if(listResponse == null) {
@@ -46,7 +46,7 @@ public class ItemController {
         return ResponseEntity.ok(listResponse);
     }
 
-    @PutMapping("/admin/item")
+    @PutMapping("/admin/api/item")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateItem(@RequestBody ItemDto itemDto, @RequestParam("categoryId")Integer categoryId, @RequestParam("brandId")Integer brandId) {
         JSONObject response = itemService.updateItem(itemDto, categoryId, brandId);
@@ -56,7 +56,7 @@ public class ItemController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/item")
+    @DeleteMapping("/admin/api/item")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteItem(@RequestParam("id")Integer id) {
         JSONObject response = itemService.deleteItem(id);

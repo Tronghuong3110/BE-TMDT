@@ -12,17 +12,16 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/api")
 public class VoucherController {
     @Autowired
     private IVoucherService voucherService;
 
-    @GetMapping("/vouchers")
+    @GetMapping("/api/vouchers")
     public List<VoucherDto> findAll() {
         return voucherService.findAll();
     }
 
-    @GetMapping("/admin/voucher")
+    @GetMapping("/admin/api/voucher")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> findOne(@RequestParam("id") Integer id) {
         JSONObject response = voucherService.findOne(id);
@@ -32,7 +31,7 @@ public class VoucherController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/admin/voucher")
+    @PostMapping("/admin/api/voucher")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> saveVoucher(@RequestBody VoucherDto voucherDto) {
         JSONObject response = voucherService.saveVoucher(voucherDto);
@@ -42,7 +41,7 @@ public class VoucherController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/admin/voucher")
+    @PutMapping("/admin/api/voucher")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateVoucher(@RequestBody VoucherDto voucherDto) {
         JSONObject response = voucherService.updateVoucher(voucherDto);
@@ -52,7 +51,7 @@ public class VoucherController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/admin/voucher")
+    @DeleteMapping("/admin/api/voucher")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> deleteVoucher(@RequestParam("id") Integer id) {
         JSONObject response = voucherService.deleteVoucher(id);

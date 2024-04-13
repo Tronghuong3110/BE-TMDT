@@ -34,13 +34,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    	http.cors().and().csrf().disable();
+        http.cors().and().csrf().disable();
         return http.csrf().disable()
                 .authorizeHttpRequests().requestMatchers("/api/hello-world","/api/v1/login", "/api/v1/signup").permitAll()
                 .and()
-                .authorizeHttpRequests().requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .authorizeHttpRequests().requestMatchers("/admin/api/**").hasAuthority("ADMIN")
                 .and()
-                .authorizeHttpRequests().requestMatchers("/api/**").authenticated()
+                .authorizeHttpRequests().requestMatchers("/api/**").permitAll()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
