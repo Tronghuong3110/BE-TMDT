@@ -1,6 +1,7 @@
 package com.javatechie.config;
 
 import com.javatechie.entity.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,12 +11,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Data
 public class UserInfoUserDetails implements UserDetails {
-
     private String username;
     private String password;
     private String roles;
     private List<GrantedAuthority> authorities;
+
+    public UserInfoUserDetails() {
+    }
 
     public UserInfoUserDetails(User user) {
         username= user.getUsername();

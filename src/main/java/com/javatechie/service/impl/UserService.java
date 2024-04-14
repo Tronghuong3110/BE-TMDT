@@ -133,11 +133,20 @@ public class UserService implements IUserService {
     @Override
     public JSONObject updateUser(UserDto userDto) {
         JSONObject response = new JSONObject();
+        User user = new User();
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            UserInfoUserDetails userInfo = (UserInfoUserDetails) auth.getPrincipal();
-            User user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(null);
-            if(user == null || !user.getId().equals(userDto.getId())) {
+            UserInfoUserDetails userInfo = new UserInfoUserDetails();
+            // Th chỉnh sửa thông tin user đang đăng nhập
+            if(userDto.getId() == null) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                userInfo = (UserInfoUserDetails) auth.getPrincipal();
+                user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(null);
+            }
+            // TH chỉnh sửa thông tin user do admin chính sửa
+            else {
+                user = userInfoRepository.findById(userDto.getId()).orElse(null);
+            }
+            if(user == null) {
                 response.put("code", 0);
                 response.put("message", "Can not change information of user");
                 return response;
@@ -148,6 +157,7 @@ public class UserService implements IUserService {
                 response.put("message", "Can not change information");
                 return response;
             }
+            // TH thay đổi password ==> check lại điều kiện password
             if (userDto.getPassword() != null) {
                 Boolean checkPassword = CheckPassWord.isStrongPassword(userDto.getPassword());
                 if(!checkPassword) {
@@ -206,10 +216,7 @@ public class UserService implements IUserService {
         else if (role == 0) { // role == 0 ==> employee
             roleStr = ConstUtil.ROLE_EMPLOYEE;
         }
-        else if(role == 2) { // role == 2 ==> admin + employee
-            roleStr = ConstUtil.ROLE_ADMIN + ", " + ConstUtil.ROLE_EMPLOYEE;
-        }
-        else { // role == 3 ==> user
+        else { // role == 2 ==> user
             roleStr = ConstUtil.ROLE_USER;
         }
         return roleStr;
