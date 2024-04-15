@@ -224,14 +224,9 @@ public class UserService implements IUserService {
 
     private User convertFromDtoToEntity(UserDto userDto, User user) {
         try {
-            if(userDto.getName() != null) {
-                user.setName(userDto.getName());
-            }
+            BeanUtils.copyProperties(userDto, user);
             if(userDto.getPassword() != null) {
                 user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            }
-            if(userDto.getAddress() != null) {
-                user.setAddress(userDto.getAddress());
             }
             return user;
         }

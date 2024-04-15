@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests().requestMatchers("/admin/api/**").hasAuthority("ADMIN")
                 .and()
-                .authorizeHttpRequests().requestMatchers("/api/**").permitAll()
+                .authorizeHttpRequests().requestMatchers("/api/**").authenticated()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
