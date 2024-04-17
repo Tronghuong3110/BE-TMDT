@@ -25,20 +25,29 @@ public class VoucherService implements IVoucherService {
             Boolean checkName = voucherRepository.existsByName(voucherDto.getName());
             if(checkName) {
                 response.put("code", 0);
-                response.put("message", "Name has been duplicated");
+                response.put("message", "Name has been duplicated!!");
+                return response;
+            }
+            if(voucherDto.getStartDate().compareTo(voucherDto.getEndDate()) > 0) {
+                response.put("code", 0);
+                response.put("message", "The start date cannot be greater than the end date!!");
                 return response;
             }
             VoucherEntity voucher = new VoucherEntity();
             BeanUtils.copyProperties(voucherDto, voucher);
             voucher.setDeleted(0);
-            voucherRepository.save(voucher);
+            voucher.setNumberRemain(voucherDto.getNumberVoucher());
+            voucher = voucherRepository.save(voucher);
+            BeanUtils.copyProperties(voucher, voucherDto);
             response.put("code", 1);
             response.put("message", "Add new voucher success");
+            response.put("voucher", voucherDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
             response.put("message", e.getMessage());
+            response.put("voucher", null);
         }
         return response;
     }
@@ -141,21 +150,7 @@ public class VoucherService implements IVoucherService {
 
     private VoucherEntity convertToEntity(VoucherEntity voucher, VoucherDto voucherDto) {
         try {
-            if(voucherDto.getName() != null) {
-                voucher.setName(voucher.getName());
-            }
-            if(voucherDto.getNumberVoucher() != null) {
-                voucher.setNumberVoucher(voucherDto.getNumberVoucher());
-            }
-            if(voucherDto.getDescription() != null) {
-                voucher.setDescription(voucherDto.getDescription());
-            }
-            if(voucherDto.getDiscount() != null) {
-                voucher.setDiscount(voucherDto.getDiscount());
-            }
-            if(voucherDto.getDiscountConditions() != null) {
-                voucher.setDiscountConditions(voucherDto.getDiscountConditions());
-            }
+            BeanUtils.copyProperties(voucherDto, voucher);
             return voucher;
         }
         catch (Exception e) {

@@ -24,8 +24,14 @@ public class VoucherEntity {
     private Integer discountConditions; // điều kiện áp dụng giảm giá
     @Column(name = "number_voucher")
     private Integer numberVoucher; // số lượng phiếu giảm giá ban hành
+    @Column(name = "number_remain")
+    private Integer numberRemain;
     @Column(name = "deleted")
     private Integer deleted;
+    @Column(name = "start_date")
+    private Date startDate;
+    @Column(name = "end_date")
+    private Date endDate;
 
     @OneToMany(mappedBy = "voucher")
     private List<UserVoucherEntity> userVouchers;

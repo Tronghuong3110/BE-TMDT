@@ -25,8 +25,7 @@ public class PromotionEntity {
     private Integer deleted;
 
     @OneToMany(mappedBy = "promotion")
-    private List<ItemDetailEntity> items;
-
+    private List<ItemEntity> items;
     @OneToMany(mappedBy = "promotion")
     private List<NotificationEntity> notifications;
 }

@@ -1,9 +1,8 @@
 package com.javatechie.dto;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
-import java.security.PrivateKey;
+import java.sql.Date;
 import java.util.List;
 
 @Data
@@ -16,4 +15,7 @@ public class VoucherDto {
     private Integer numberVoucher;
     private Integer deleted;
     List<Integer> idItems;
+    private Date startDate;
+    private Date endDate;
+    private Integer numberRemain;
 }

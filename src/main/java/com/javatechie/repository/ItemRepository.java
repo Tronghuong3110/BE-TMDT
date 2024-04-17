@@ -17,4 +17,6 @@ public interface ItemRepository extends JpaRepository<ItemEntity, Integer> {
     List<ItemEntity> findAllByDeletedAndCategory_IdAndBrand_IdAndKey(@Param("categoryId") Integer categoryId,
                                                                      @Param("brandId") Integer brandId,
                                                                      @Param("key") String key);
+
+    List<ItemEntity> findAllByDeletedAndPromotion_id(Integer deleted, Integer promotionId);
 }

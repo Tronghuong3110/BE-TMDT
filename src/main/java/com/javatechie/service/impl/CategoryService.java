@@ -30,14 +30,17 @@ public class CategoryService implements ICategoryService {
                 response.put("message", "Code has been duplicated");
                 return response;
             }
-            categoryRepository.save(categoryEntity);
+            categoryEntity = categoryRepository.save(categoryEntity);
+            BeanUtils.copyProperties(categoryEntity, categoryDto);
             response.put("code", 1);
             response.put("message", "Add category success");
+            response.put("category", categoryDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
             response.put("message", e.getMessage());
+            response.put("category", null);
         }
         return response;
     }
@@ -128,12 +131,7 @@ public class CategoryService implements ICategoryService {
 
     private CategoryEntity convertToEntity(CategoryEntity categoryEntity, CategoryDto categoryDto) {
         try {
-            if(categoryDto.getName() != null) {
-                categoryEntity.setName(categoryEntity.getName());
-            }
-            if(categoryDto.getDescription() != null) {
-                categoryEntity.setDescription(categoryDto.getDescription());
-            }
+            BeanUtils.copyProperties(categoryDto, categoryEntity);
             return categoryEntity;
         }
         catch (Exception e) {

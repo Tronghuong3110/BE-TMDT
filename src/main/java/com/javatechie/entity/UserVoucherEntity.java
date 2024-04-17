@@ -1,6 +1,5 @@
 package com.javatechie.entity;
 
-import com.fasterxml.jackson.annotation.JacksonInject;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,7 +17,7 @@ public class UserVoucherEntity {
     private Date dateStart;
     @Column(name = "date_end")
     private Date dateEnd;
-//
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

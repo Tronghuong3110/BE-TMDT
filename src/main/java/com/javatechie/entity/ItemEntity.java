@@ -33,4 +33,7 @@ public class ItemEntity {
     @ManyToOne
     @JoinColumn(name = "category_id")
     private CategoryEntity category;
+    @ManyToOne
+    @JoinColumn(name = "promotion_id")
+    private PromotionEntity promotion;
 }

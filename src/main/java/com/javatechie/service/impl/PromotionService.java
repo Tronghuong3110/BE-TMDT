@@ -1,6 +1,7 @@
 package com.javatechie.service.impl;
 
 import com.javatechie.config.UserInfoUserDetails;
+import com.javatechie.dto.ItemDto;
 import com.javatechie.dto.PromotionDto;
 import com.javatechie.entity.*;
 import com.javatechie.repository.ItemDetailRepository;
@@ -11,6 +12,7 @@ import com.javatechie.service.IPromotionService;
 import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -49,21 +51,24 @@ public class PromotionService implements IPromotionService {
             // chọn sản phầm áp dụng khuyến mại
             if(promotionDto.getIdItems() != null) {
                 for(Integer idItem : promotionDto.getIdItems()) {
-                    ItemDetailEntity item = itemDetailRepository.findByIdAndIsAvailable(idItem, true).orElse(null);
+                    ItemEntity item = itemRepository.findByIdAndDeleted(idItem, 0).orElse(null);
                     if(item == null) {
                         continue;
                     }
                     item.setPromotion(promotion);
-                    itemDetailRepository.save(item);
+                    itemRepository.save(item);
                 }
             }
+            BeanUtils.copyProperties(promotion, promotionDto);
             response.put("code", 1);
             response.put("message", "Add new promotion success");
+            response.put("promotion", promotion);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
             response.put("message", "Add new promotion fail");
+            response.put("promotion", null);
         }
         return response;
     }
@@ -128,25 +133,39 @@ public class PromotionService implements IPromotionService {
 
             // cập nhật lại danh sách sản phẩm được áp dụng khuyến mại
             promotion = promotionRepository.save(promotion);
-            List<String> listResponse = new ArrayList<>();
+            List<ItemDto> listResponse = new ArrayList<>();
+            // cập nhật thêm sản phẩm được áp dụng khuyến mại
             if(promotionDto.getIdItems() != null) {
                 for(Integer idItem : promotionDto.getIdItems()) {
-                    ItemDetailEntity item = itemDetailRepository.findByIdAndIsAvailable(idItem, true).orElse(null);
+                    ItemEntity item = itemRepository.findByIdAndDeleted(idItem, 0).orElse(null);
                     if(item == null) {
                         continue;
                     }
                     item.setPromotion(promotion);
-                    itemDetailRepository.save(item);
-                    listResponse.add("");
+                    item = itemRepository.save(item);
+                    ItemDto itemDto= new ItemDto();
+                    BeanUtils.copyProperties(item, itemDto);
+                    listResponse.add(itemDto);
+                }
+            }
+            // loại bỏ khuyến mại của một vaài sản phẩm được yêu cầu
+            if(promotionDto.getIdItemsRemove() != null) {
+                for(Integer idItem : promotionDto.getIdItemsRemove()) {
+                    ItemEntity item = itemRepository.findByIdAndDeleted(idItem, 0).orElse(null);
+                    if(item == null) continue;
+                    item.setPromotion(null);
+                    itemRepository.save(item);
                 }
             }
             response.put("code", 1);
             response.put("message", "Update promotion success");
+            response.put("listItem", listResponse);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 1);
             response.put("message", "Update promotion fail");
+            response.put("listItem", new ArrayList<>());
         }
         return response;
     }
@@ -160,6 +179,12 @@ public class PromotionService implements IPromotionService {
                 response.put("code", 0);
                 response.put("message", "Can not found promotion with id = " + id);
                 return response;
+            }
+            // xóa bỏ khuyến mại đang xóa được áp dụng trên các sản phẩm
+            List<ItemEntity> listItems = itemRepository.findAllByDeletedAndPromotion_id(0, promotion.getId());
+            for(ItemEntity item : listItems) {
+                item.setPromotion(null);
+                itemRepository.save(item);
             }
             promotion.setDeleted(1);
             promotionRepository.save(promotion);
@@ -176,18 +201,7 @@ public class PromotionService implements IPromotionService {
 
     private PromotionEntity toEntity(PromotionDto promotionDto, PromotionEntity promotion) {
         try {
-            if(promotionDto.getContent() != null) {
-                promotion.setContent(promotionDto.getContent());
-            }
-            if(promotionDto.getDateStart() != null) {
-                promotion.setDateStart(promotionDto.getDateStart());
-            }
-            if (promotionDto.getDateEnd() != null) {
-                promotion.setDateEnd(promotionDto.getDateEnd());
-            }
-            if(promotionDto.getDiscount() != null) {
-                promotion.setDiscount(promotionDto.getDiscount());
-            }
+            BeanUtils.copyProperties(promotionDto, promotion);
             return promotion;
         }
         catch (Exception e) {

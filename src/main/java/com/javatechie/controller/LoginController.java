@@ -47,9 +47,8 @@ public class LoginController {
             return ResponseEntity.badRequest().body(jsonObject);
         }
     }
-
     // đăng kí
-    @PostMapping("/signup") // role == 0(employee), 1(admin), 2(admin + employee), 3(user)
+    @PostMapping("/signup") // role == 0(employee), 1(admin), 3(user)
     public ResponseEntity<?> signIn(@RequestBody UserDto user, @RequestParam("role") Integer role) {
         JSONObject response = new JSONObject();
         String responseSignUp = userService.addUser(user, role);

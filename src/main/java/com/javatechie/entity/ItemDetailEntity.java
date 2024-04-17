@@ -35,10 +35,6 @@ public class ItemDetailEntity {
 
     @OneToMany(mappedBy = "item")
     List<ItemInvoiceEntity> invoices;
-    @ManyToOne
-    @JoinColumn(name = "promotion_id")
-    private PromotionEntity promotion;
     @OneToOne(mappedBy = "item")
     private CartItemEntity cartItem;
-
 }

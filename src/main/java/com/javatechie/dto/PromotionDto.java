@@ -1,6 +1,5 @@
 package com.javatechie.dto;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.sql.Date;
@@ -16,4 +15,5 @@ public class PromotionDto {
     private Integer discount; // giảm bao nhiêu %
     private Integer deleted;
     private List<Integer> idItems = new ArrayList<>();
+    List<Integer> idItemsRemove = new ArrayList<>();
 }

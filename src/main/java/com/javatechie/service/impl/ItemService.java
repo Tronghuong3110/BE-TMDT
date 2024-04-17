@@ -59,6 +59,7 @@ public class ItemService implements IItemService {
                     itemDetailEntity.setItem(phone);
                     itemDetailRepository.save(itemDetailEntity);
                 }
+                BeanUtils.copyProperties(phone, item);
                 response.put("message", "Add new phone success");
             }
             else if (category.getCode().equals("lap-top")) {
@@ -81,6 +82,7 @@ public class ItemService implements IItemService {
                     itemDetailRepository.save(itemDetailEntity);
                 }
                 response.put("message", "Add new laptop success");
+                BeanUtils.copyProperties(lapTop, item);
             }
             else if (category.getCode().equals("phu-kien")) {
                 AccessoryEntity accessory = (AccessoryEntity) saveNewItem(item, category, brand, new AccessoryEntity());
@@ -102,13 +104,16 @@ public class ItemService implements IItemService {
                     itemDetailRepository.save(itemDetailEntity);
                 }
                 response.put("message", "Add new accessory success");
+                BeanUtils.copyProperties(accessory, item);
             }
+            response.put("item", item);
             response.put("code", 1);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
             response.put("message", "Add new item error");
+            response.put("item", null);
         }
         return response;
     }
