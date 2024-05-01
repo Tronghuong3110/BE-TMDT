@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class IBrandServiceImol implements IBrandService {
+public class BrandService implements IBrandService {
     @Autowired
     private BrandRepository brandRepository;
     @Override
