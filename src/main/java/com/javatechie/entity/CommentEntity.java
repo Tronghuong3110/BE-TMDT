@@ -7,24 +7,23 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
+@Table(name = "comment")
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "review")
-public class ReviewEntity {
-
+public class CommentEntity {
     @Id
     private Long id;
-    @Column(name = "ranking")
-    private Integer ranking;
-    @Column(name = "date_review")
-    private Date dateReview;
+    private Date createDate;
+    private Date modifiledDate;
+    @Column(name = "content", columnDefinition = "longtext")
+    private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id")
-    private ItemEntity item;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private ItemEntity item;
 }

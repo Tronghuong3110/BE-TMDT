@@ -59,7 +59,7 @@ public class ItemDetailService implements IITemDetailService {
     public ItemDetailDto findById(Integer id) {
         try {
             ItemDetailDto itemDetailDto = new ItemDetailDto();
-            ItemDetailEntity itemDetailEntity = itemDetailRepository.findById(id).orElse(null);
+            ItemDetailEntity itemDetailEntity = itemDetailRepository.findByIdAndDeleted(id, 0).orElse(null);
             BeanUtils.copyProperties(itemDetailEntity, itemDetailDto);
             return itemDetailDto;
         }
@@ -73,7 +73,7 @@ public class ItemDetailService implements IITemDetailService {
     public JSONObject updateItemDetail(ItemDetailDto itemDetailDto) {
         JSONObject response = new JSONObject();
         try {
-            ItemDetailEntity itemDetailEntity = itemDetailRepository.findById(itemDetailDto.getId()).orElse(null);
+            ItemDetailEntity itemDetailEntity = itemDetailRepository.findByIdAndDeleted(itemDetailDto.getId(), 0).orElse(null);
             BeanUtils.copyProperties(itemDetailDto, itemDetailEntity);
             itemDetailRepository.save(itemDetailEntity);
             response.put("code", 1);

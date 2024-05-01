@@ -35,6 +35,8 @@ public class User {
     private String phoneNumber;
     @Column(name = "dob")
     private Date dob;
+    @Column(name = "avatar_path")
+    private String avatarPath;
 
     @OneToMany(mappedBy = "user")
     private List<CartEntity> carts;

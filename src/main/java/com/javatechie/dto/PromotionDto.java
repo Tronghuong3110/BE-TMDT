@@ -16,5 +16,6 @@ public class PromotionDto {
     private Integer deleted;
     private String pathImage;
     private List<Integer> idItems = new ArrayList<>();
-    List<Integer> idItemsRemove = new ArrayList<>();
+    private List<Integer> idItemsRemove = new ArrayList<>();
+    private List<ItemDto> items = new ArrayList<>();
 }

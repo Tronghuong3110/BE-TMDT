@@ -16,4 +16,5 @@ public class UserDto {
     private String roles;
     private String phoneNumber;
     private Date dob;
+    private String avatarPath;
 }

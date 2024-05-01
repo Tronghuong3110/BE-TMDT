@@ -81,6 +81,14 @@ public class PromotionService implements IPromotionService {
             for(PromotionEntity promotion : listPromotions) {
                 PromotionDto promotionDto = new PromotionDto();
                 BeanUtils.copyProperties(promotion, promotionDto);
+                List<ItemEntity> listItem = promotion.getItems();
+                List<ItemDto> listItemDto = new ArrayList<>();
+                for(ItemEntity item : listItem) {
+                    ItemDto itemDto = new ItemDto();
+                    BeanUtils.copyProperties(item, itemDto);
+                    listItemDto.add(itemDto);
+                }
+                promotionDto.setItems(listItemDto);
                 listResponse.add(promotionDto);
             }
             return listResponse;
@@ -103,6 +111,14 @@ public class PromotionService implements IPromotionService {
             }
             PromotionDto promotionDto = new PromotionDto();
             BeanUtils.copyProperties(promotion, promotionDto);
+            List<ItemEntity> listItem = promotion.getItems();
+            List<ItemDto> listItemDto = new ArrayList<>();
+            for(ItemEntity item : listItem) {
+                ItemDto itemDto = new ItemDto();
+                BeanUtils.copyProperties(item, itemDto);
+                listItemDto.add(itemDto);
+            }
+            promotionDto.setItems(listItemDto);
             response.put("code", 1);
             response.put("message", promotionDto);
         }
@@ -125,6 +141,7 @@ public class PromotionService implements IPromotionService {
                 return response;
             }
             promotion = toEntity(promotionDto, promotion);
+            promotion.setDeleted(0);
             if(promotion == null) {
                 response.put("code", 0);
                 response.put("message", "Can not update promotion");
