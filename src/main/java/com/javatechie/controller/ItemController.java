@@ -28,7 +28,7 @@ public class ItemController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/item")
+    @GetMapping("/customer/api/item") // lấy ra thông tin chi tiết 1 sản phẩm (chưa đăng nhập cũng có thể xem)
     public ResponseEntity<?> findOne(@RequestParam("id") Integer id) {
         ItemDto itemDto = itemService.findOneById(id);
         if(itemDto == null) {
@@ -37,7 +37,7 @@ public class ItemController {
         return ResponseEntity.ok(itemDto);
     }
 
-    @GetMapping("/api/items")
+    @GetMapping("/customer/api/items") // lấy ra tất cả sản phẩm (chưa đăng nhập cũng có thể xem)
     public ResponseEntity<?> findAllItem(@RequestParam("categoryId") Optional<Integer> categoryId, @RequestParam("brandId") Optional<Integer> brandId, @RequestParam("key")Optional<String> key) {
         List<ItemDto> listResponse = itemService.findAllItem(categoryId.orElse(null), brandId.orElse(null), key.orElse(null));
         if(listResponse == null) {
@@ -65,4 +65,6 @@ public class ItemController {
         }
         return ResponseEntity.ok(response);
     }
+
+
 }

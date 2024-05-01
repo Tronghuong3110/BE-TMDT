@@ -6,6 +6,7 @@ import lombok.Data;
 public class CartItemDto {
     private Integer id;
     private Integer quantity;
-    private Integer price; //
+    private Double price; //
     private ItemDto itemDto;
+    private ItemDetailDto itemDetail;
 }

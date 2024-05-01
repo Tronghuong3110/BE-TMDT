@@ -50,16 +50,10 @@ public class LoginController {
     // đăng kí
     @PostMapping("/signup") // role == 0(employee), 1(admin), 3(user)
     public ResponseEntity<?> signIn(@RequestBody UserDto user, @RequestParam("role") Integer role) {
-        JSONObject response = new JSONObject();
-        String responseSignUp = userService.addUser(user, role);
-        if(responseSignUp.equals("Success")) {
-            response.put("code", 1);
-            response.put("message", "Sign up account success");
-            return ResponseEntity.ok(response);
+        JSONObject responseSignUp = userService.addUser(user, role);
+        if(responseSignUp.get("code").equals(1)) {
+            return ResponseEntity.ok(responseSignUp);
         }
-        response.put("code", 0);
-        response.put("message", responseSignUp);
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.badRequest().body(responseSignUp);
     }
-
 }

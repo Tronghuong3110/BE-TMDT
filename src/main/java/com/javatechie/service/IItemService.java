@@ -1,5 +1,6 @@
 package com.javatechie.service;
 
+import com.javatechie.dto.ItemDetailDto;
 import com.javatechie.dto.ItemDto;
 import com.javatechie.entity.ItemEntity;
 import org.json.simple.JSONObject;
@@ -12,4 +13,6 @@ public interface IItemService {
     JSONObject deleteItem(Integer id);
     ItemDto findOneById(Integer id);
     List<ItemDto> findAllItem(Integer categoryId, Integer brandId, String key);
+    JSONObject saveItemFavorite(Integer id);
+    List<ItemDto> findAllItemFavoriteOrViewed(Integer favorite, Integer viewed);
 }

@@ -51,7 +51,7 @@ public class OrderService implements IOrderService {
         try {
             OrderEntity order = orderRepository.findById(orderId).orElse(null);
             CartEntity cartEntity = order.getCart();
-            List<CartItemEntity> listCartItem = cartItemRepository.findAllByCartId(cartEntity.getId());
+            List<CartItemEntity> listCartItem = cartItemRepository.findAllByCart_Id(cartEntity.getId());
             List<CartItemDto> listResponse = new ArrayList<>();
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();

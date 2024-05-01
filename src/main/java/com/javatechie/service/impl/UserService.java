@@ -10,6 +10,7 @@ import com.javatechie.util.ConstUtil;
 import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,41 +27,47 @@ public class UserService implements IUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Override
-    public String addUser(UserDto user, Integer role) {
+    public JSONObject addUser(UserDto user, Integer role) {
+        JSONObject response = new JSONObject();
         try {
+            response.put("code", 0);
+            response.put("user", null);
             if(user.getUsername() == null) {
-                return "Username can not null";
+                response.put("message", "Username can not null");
+                return response;
             }
             Boolean checkUsername = checkUsernameExist(user.getUsername());
             if(checkUsername) { // email đã tồn tại trong cơ sở dữ liệu
-                return "Username already exists ";
+                response.put("message", "Username already exists ");
+                return response;
             }
             // kiểm tra password có hợp lệ không
             Boolean checkPassword = CheckPassWord.isStrongPassword(user.getPassword());
             if(!checkPassword) { // password không hợp lệ
-                return "Password is not valid";
+                response.put("message", "Password is not valid");
+                return response;
             }
 
             User userEntity = new User();
             BeanUtils.copyProperties(user, userEntity);
-            if(userEntity == null) {
-                System.out.print("Add user error!!");
-            }
-            else {
-                userEntity.setRoles(checkRoles(role));
-                userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
-                userEntity.setCreateDate(new Date(System.currentTimeMillis()));
-                userEntity.setDeleted(0);
-                userInfoRepository.save(userEntity);
-                return "Success";
-            }
+            userEntity.setRoles(checkRoles(role));
+            userEntity.setPassword(passwordEncoder.encode(user.getPassword()));
+            userEntity.setCreateDate(new Date(System.currentTimeMillis()));
+            userEntity.setDeleted(0);
+            userEntity = userInfoRepository.save(userEntity);
+            BeanUtils.copyProperties(userEntity, user);
+            response.put("code", 1);
+            response.put("message", "Add new user success!!");
+            response.put("user", user);
+            return response;
         }
         catch (Exception e) {
             System.out.println("Đăng ký tài khoản lỗi rồi!!");
             e.printStackTrace();
-            return "Fail";
+            response.put("code", 0);
+            response.put("message", "Add new user fail!!");
         }
-        return null;
+        return response;
     }
 
     @Override

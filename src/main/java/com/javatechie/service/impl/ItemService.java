@@ -1,18 +1,22 @@
 package com.javatechie.service.impl;
 
-import com.javatechie.dto.ImageDto;
-import com.javatechie.dto.ItemDetailDto;
-import com.javatechie.dto.ItemDto;
+import com.javatechie.config.UserInfoUserDetails;
+import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IItemService;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +32,10 @@ public class ItemService implements IItemService {
     private CategoryRepository categoryRepository;
     @Autowired
     private BrandRepository brandRepository;
+    @Autowired
+    private UserInfoRepository userInfoRepository;
+    @Autowired
+    private ItemViewedRepository itemViewedRepository;
     @Override
     public JSONObject saveItem(ItemDto item, Integer categoryId, Integer brandId) {
         JSONObject response = new JSONObject();
@@ -41,7 +49,7 @@ public class ItemService implements IItemService {
             }
             // thêm mới điện thoại
             if(category.getCode().equals("dien-thoai")) {
-                PhoneEntity phone = (PhoneEntity) saveNewItem(item, category, brand, new PhoneEntity());
+                PhoneEntity phone = saveNewItem(item, category, brand, new PhoneEntity());
                 if(phone == null) {
                     response.put("code", 0);
                     response.put("message", "Add new item error");
@@ -53,17 +61,11 @@ public class ItemService implements IItemService {
                     image.setItemEntity(phone);
                     imageRepository.save(image);
                 }
-                for(ItemDetailDto itemDetail : item.getItemDetails()) {
-                    ItemDetailEntity itemDetailEntity = new ItemDetailEntity();
-                    BeanUtils.copyProperties(itemDetail, itemDetailEntity);
-                    itemDetailEntity.setItem(phone);
-                    itemDetailRepository.save(itemDetailEntity);
-                }
                 BeanUtils.copyProperties(phone, item);
                 response.put("message", "Add new phone success");
             }
             else if (category.getCode().equals("lap-top")) {
-                LapTopEntity lapTop = (LapTopEntity) saveNewItem(item, category, brand, new LapTopEntity());
+                LapTopEntity lapTop = saveNewItem(item, category, brand, new LapTopEntity());
                 if(lapTop == null) {
                     response.put("code", 0);
                     response.put("message", "Add new item error");
@@ -75,17 +77,11 @@ public class ItemService implements IItemService {
                     image.setItemEntity(lapTop);
                     imageRepository.save(image);
                 }
-                for(ItemDetailDto itemDetail : item.getItemDetails()) {
-                    ItemDetailEntity itemDetailEntity = new ItemDetailEntity();
-                    BeanUtils.copyProperties(itemDetail, itemDetailEntity);
-                    itemDetailEntity.setItem(lapTop);
-                    itemDetailRepository.save(itemDetailEntity);
-                }
                 response.put("message", "Add new laptop success");
                 BeanUtils.copyProperties(lapTop, item);
             }
             else if (category.getCode().equals("phu-kien")) {
-                AccessoryEntity accessory = (AccessoryEntity) saveNewItem(item, category, brand, new AccessoryEntity());
+                AccessoryEntity accessory = saveNewItem(item, category, brand, new AccessoryEntity());
                 if(accessory == null) {
                     response.put("code", 0);
                     response.put("message", "Add new item error");
@@ -96,12 +92,6 @@ public class ItemService implements IItemService {
                     BeanUtils.copyProperties(imageDto, image);
                     image.setItemEntity(accessory);
                     imageRepository.save(image);
-                }
-                for(ItemDetailDto itemDetail : item.getItemDetails()) {
-                    ItemDetailEntity itemDetailEntity = new ItemDetailEntity();
-                    BeanUtils.copyProperties(itemDetail, itemDetailEntity);
-                    itemDetailEntity.setItem(accessory);
-                    itemDetailRepository.save(itemDetailEntity);
                 }
                 response.put("message", "Add new accessory success");
                 BeanUtils.copyProperties(accessory, item);
@@ -129,15 +119,20 @@ public class ItemService implements IItemService {
                 response.put("message", "Can not update item because of can not found category and brand");
                 return response;
             }
-            ItemEntity itemEntity = itemRepository.findByIdAndDeleted(item.getId(), 0).orElse(null);
+            ItemEntity itemEntity = itemRepository.findByIdAndDeleted(item.getId(), 0).orElse(new ItemEntity());
             if(itemEntity == null) {
                 response.put("code", 0);
                 response.put("message", "Can not found item with id = " + item.getId());
                 return response;
             }
             itemEntity = updateItem(item, category, brand, itemEntity);
+            BeanUtils.copyProperties(itemEntity, item);
+//            CategoryDto categoryDto = new CategoryDto();
+//            ItemDetailDto itemDetailDto = new ItemDetailDto();
+//            BeanUtils.copyProperties(itemEntity.getCategory(), categoryDto);
             response.put("code", 1);
             response.put("message", "Update item success");
+            response.put("item", item);
             return response;
         }
         catch (Exception e) {
@@ -181,7 +176,7 @@ public class ItemService implements IItemService {
             }
             ItemDto itemDto = new ItemDto();
             BeanUtils.copyProperties(item, itemDto);
-            List<ItemDetailEntity> listItemDetail = itemDetailRepository.findAllByItem_Id(id);
+            List<ItemDetailEntity> listItemDetail = itemDetailRepository.findAllByItem_IdAndDeleted(id, 0);
             List<ItemDetailDto> listItemDetailDto = new ArrayList<>();
             for(ItemDetailEntity itemDetailEntity : listItemDetail) {
                 ItemDetailDto itemDetailDto = new ItemDetailDto();
@@ -197,6 +192,21 @@ public class ItemService implements IItemService {
                 listImageDto.add(imageDto);
             }
             itemDto.setImages(listImageDto);
+            CategoryDto category = new CategoryDto();
+            BeanUtils.copyProperties(item.getCategory(), category);
+            itemDto.setCategoryDto(category);
+            // thêm mới vào danh sách item đã xem của user
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Object object = auth.getPrincipal();
+            if(!(object.equals("anonymousUser"))) {
+                // TH đã đăng nhập
+                UserInfoUserDetails userDetails = new UserInfoUserDetails();
+                User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+                ItemViewedEntity itemViewed = itemViewedRepository.findByItemIdAndUserId(item.getId(), user.getId()).orElse(
+                        new ItemViewedEntity(System.currentTimeMillis(), item.getId(), user.getId(), 1, 0));
+                itemViewed.setViewed(1);
+                itemViewedRepository.save(itemViewed);
+            }
             return itemDto;
         }
         catch (Exception e) {
@@ -211,6 +221,7 @@ public class ItemService implements IItemService {
         List<ItemDto> listResponse = new ArrayList<>();
         try {
             for(ItemEntity item : listItem) {
+                System.out.println();
                 ItemDto itemDto = new ItemDto();
                 BeanUtils.copyProperties(item, itemDto);
                 List<ItemDetailEntity> itemDetailEntities = item.getItemDetails();
@@ -228,9 +239,58 @@ public class ItemService implements IItemService {
                     listImage.add(imageDto);
                 }
                 itemDto.setImages(listImage);
+                CategoryDto category = new CategoryDto();
+                BeanUtils.copyProperties(item.getCategory(), category);
+                itemDto.setCategoryDto(category);
                 listResponse.add(itemDto);
             }
             return listResponse;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // thêm mới sản phẩm yêu thích
+    @Override
+    public JSONObject saveItemFavorite(Integer id) {
+        JSONObject response = new JSONObject();
+        try {
+            ItemEntity item = itemRepository.findByIdAndDeleted(id, 0).orElse(new ItemEntity());
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserInfoUserDetails userDetails = (UserInfoUserDetails) auth.getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            ItemViewedEntity itemViewedEntity = new ItemViewedEntity(System.currentTimeMillis(), item.getId(), user.getId(), 0, 1);
+            itemViewedEntity = itemViewedRepository.save(itemViewedEntity);
+            response.put("code", 1);
+            response.put("message", "Add new success");
+            response.put("itemView", itemViewedEntity.getId());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Add new fail");
+            response.put("itemView", null);
+        }
+        return response;
+    }
+
+    @Override
+    public List<ItemDto> findAllItemFavoriteOrViewed(Integer favorite, Integer viewed) {
+        try {
+            UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            List<ItemViewedEntity> listItemViewed = itemViewedRepository.findAllByFavoriteOrViewedAndUser(favorite, viewed, user.getId());
+            List<ItemDto> responses = new ArrayList<>();
+            for (ItemViewedEntity itemViewed : listItemViewed) {
+                ItemEntity item = itemRepository.findByIdAndDeleted(itemViewed.getItemId(), 0).orElse(null);
+                if(item == null) continue;
+                ItemDto itemDto = new ItemDto();
+                BeanUtils.copyProperties(item, itemDto);
+                responses.add(itemDto);
+            }
+            return responses;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -264,11 +324,6 @@ public class ItemService implements IItemService {
                 item.setBrand(brand);
             }
             item = itemRepository.save(item);
-            for(ItemDetailDto itemDetail : itemDto.getItemDetails()) {
-                ItemDetailEntity itemDetailEntity = itemDetailRepository.findById(itemDetail.getId()).orElse(null);
-                BeanUtils.copyProperties(itemDetail, itemDetailEntity);
-                itemDetailRepository.save(itemDetailEntity);
-            }
             for(ImageDto image : itemDto.getImages()) {
                 ImageEntity imageEntity = imageRepository.findById(image.getId()).orElse(null);
                 BeanUtils.copyProperties(image, imageEntity);

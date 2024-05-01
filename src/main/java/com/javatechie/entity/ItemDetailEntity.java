@@ -28,6 +28,8 @@ public class ItemDetailEntity {
     private String diskSize;
     @Column(name = "ram")
     private String ram;
+    @Column(name = "deleted")
+    private Integer deleted;
 
     @ManyToOne
     @JoinColumn(name = "item_id")

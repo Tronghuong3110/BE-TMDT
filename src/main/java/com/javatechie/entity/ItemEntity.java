@@ -16,7 +16,7 @@ public class ItemEntity {
     private String vendor; // nhà sản xuất
     @Column(name = "name")
     private String name;
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
     @Column(name = "deleted")
     private Integer deleted;

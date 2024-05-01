@@ -16,7 +16,7 @@ public class VoucherController {
     @Autowired
     private IVoucherService voucherService;
 
-    @GetMapping("/api/vouchers")
+    @GetMapping("/customer/api/vouchers")
     public List<VoucherDto> findAll() {
         return voucherService.findAll();
     }

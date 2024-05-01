@@ -31,5 +31,5 @@ public class ItemDto {
     List<ImageDto> images;
     // danh sách thông tin chi tiết của sản phẩm
     List<ItemDetailDto> itemDetails;
-    
+    CategoryDto categoryDto;
 }

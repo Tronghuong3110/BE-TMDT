@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 
 import java.util.List;
 
-public interface BrandService {
+public interface IBrandService {
     JSONObject save(BrandDto brandDto);
     List<BrandDto> findAllBrand();
 }

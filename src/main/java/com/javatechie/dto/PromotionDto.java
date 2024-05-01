@@ -14,6 +14,7 @@ public class PromotionDto {
     private Date dateEnd;
     private Integer discount; // giảm bao nhiêu %
     private Integer deleted;
+    private String pathImage;
     private List<Integer> idItems = new ArrayList<>();
     List<Integer> idItemsRemove = new ArrayList<>();
 }

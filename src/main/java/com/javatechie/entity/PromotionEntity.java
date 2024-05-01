@@ -19,6 +19,8 @@ public class PromotionEntity {
     private Date dateStart;
     @Column(name = "date_end")
     private Date dateEnd;
+    @Column(name = "path_image")
+    private String pathImage;
     @Column(name = "discount")
     private Integer discount; // giảm bao nhiêu %
     @Column(name = "deleted")

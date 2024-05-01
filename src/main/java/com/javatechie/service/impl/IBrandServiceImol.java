@@ -3,7 +3,7 @@ package com.javatechie.service.impl;
 import com.javatechie.dto.BrandDto;
 import com.javatechie.entity.BrandEntity;
 import com.javatechie.repository.BrandRepository;
-import com.javatechie.service.BrandService;
+import com.javatechie.service.IBrandService;
 import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class BrandServiceImol implements BrandService {
+public class IBrandServiceImol implements IBrandService {
     @Autowired
     private BrandRepository brandRepository;
     @Override

@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 import java.util.List;
 
 public interface IUserService {
-    String addUser(UserDto user, Integer role);
+    JSONObject addUser(UserDto user, Integer role);
     List<UserDto> findAllUser();
     JSONObject findOneUserById(Integer id);
     JSONObject getInfoOfUser();

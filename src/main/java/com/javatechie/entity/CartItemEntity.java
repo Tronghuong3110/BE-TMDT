@@ -17,7 +17,6 @@ public class CartItemEntity {
     @OneToOne
     @JoinColumn(name = "item_id")
     private ItemDetailEntity item;
-
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private CartEntity cart;
