@@ -9,13 +9,12 @@ import lombok.Data;
 public class PaymentEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Column(name = "name")
     private String name;
-    @Column(name = "description", columnDefinition = "text")
+    @Column(name = "description", columnDefinition = "longtext")
     private String description;
-
+    private String code;
     @OneToOne(mappedBy = "payment")
     private OrderEntity order;
 }

@@ -4,8 +4,10 @@ import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data
-public class PaymentDto {
+public class ShipmentDto {
     private Integer id;
     private String name;
     private String description;
+    private Integer price;
+    private String shippingUnit;
 }

@@ -9,8 +9,7 @@ import lombok.Data;
 public class ShipmentEntity {
 //
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Column(name = "name")
     private String name;
     @Column(name = "description", columnDefinition = "text")
@@ -19,6 +18,7 @@ public class ShipmentEntity {
     private Integer price;
     @Column(name = "shipping_unit")
     private String shippingUnit; // đơn vị vận chuyển
+    private String code;
 
     @OneToOne(mappedBy = "shipment")
     private OrderEntity order;

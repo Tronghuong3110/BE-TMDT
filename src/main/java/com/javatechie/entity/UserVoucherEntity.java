@@ -11,8 +11,7 @@ import java.sql.Date;
 public class UserVoucherEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Column(name = "date_start")
     private Date dateStart;
     @Column(name = "date_end")
@@ -24,4 +23,6 @@ public class UserVoucherEntity {
     @ManyToOne
     @JoinColumn(name = "voucher_id")
     private VoucherEntity voucher;
+    @OneToOne(mappedBy = "voucher", fetch = FetchType.LAZY)
+    private OrderEntity order;
 }

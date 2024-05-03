@@ -38,8 +38,8 @@ public class User {
     @Column(name = "avatar_path")
     private String avatarPath;
 
-    @OneToMany(mappedBy = "user")
-    private List<CartEntity> carts;
+    @OneToOne(mappedBy = "user")
+    private CartEntity cart;
     @OneToMany(mappedBy = "user")
     List<OrderEntity> orders;
     @OneToMany(mappedBy = "user")

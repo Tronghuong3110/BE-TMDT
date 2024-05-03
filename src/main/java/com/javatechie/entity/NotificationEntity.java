@@ -10,7 +10,7 @@ public class NotificationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "description", columnDefinition = "text")
+    @Column(name = "description", columnDefinition = "longtext")
     private String description;
 
     @ManyToOne

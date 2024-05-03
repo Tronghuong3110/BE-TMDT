@@ -4,15 +4,21 @@ import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 public class OrderDto {
-    private Integer id;
+    private Long id;
     private Date createDate;
-    private Double totalPrice;
-    private Integer shippingPrice;
+    private long totalPrice;
     private Double promotionMoney;
-    private String status;
+    private String statusPayment;
     private String nameUser;
-    private Integer cartId;
+    private String address;
+    private ShipmentDto shipment;
+    private PaymentDto payment;
+    private Date datePayment;
+    private String statusOrder;
+    private List<CartItemDto> cartItems;
+    private List<Integer> itemOrders;
 }

@@ -34,6 +34,7 @@ public class VoucherService implements IVoucherService {
                 return response;
             }
             VoucherEntity voucher = new VoucherEntity();
+//            voucher.setId(System.currentTimeMillis());
             BeanUtils.copyProperties(voucherDto, voucher);
             voucher.setDeleted(0);
             voucher.setNumberRemain(voucherDto.getNumberVoucher());

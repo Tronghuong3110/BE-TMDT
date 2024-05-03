@@ -31,6 +31,7 @@ public class CartService implements ICartService {
     @Autowired
     private CartRepository cartRepository;
 
+    // Thêm sản phẩm vào giỏ hàng
     @Override
     public JSONObject addItemToCart(CartItemDto cartItemDto) {
         JSONObject response = new JSONObject();
@@ -51,9 +52,8 @@ public class CartService implements ICartService {
             }
             CartEntity cart = cartRepository.findByUserAndOrdered(user.getId()).orElse(null);
             // TH chưa tồn tại giỏ hàng nào hoặc giỏ hàng đã được thanh toán ==> tạo mới giỏ hàng
-            if(cart == null || cart.getOrdered().equals(true)) {
+            if(cart == null) {
                 cart = new CartEntity();
-                cart.setOrdered(false);
                 cart.setUser(user);
                 cart.setUnixTime(System.currentTimeMillis());
                 cart = cartRepository.save(cart);
@@ -79,11 +79,12 @@ public class CartService implements ICartService {
         try {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(null);
-            CartEntity cart = cartRepository.findByUser_IdAndOrdered(user.getId(), false).orElse(null);
+            CartEntity cart = cartRepository.findAllByUserId(user.getId()).orElse(null);
+            // TH không tìm thấy user và giỏ hàng cuủa user
             if(user == null || cart == null) {
                 return null;
             }
-            List<CartItemEntity> listCartItem = cartItemRepository.findAllByCart_Id(cart.getId());
+            List<CartItemEntity> listCartItem = cartItemRepository.findAllByCart_IdAndOrdered(cart.getId(), 0);
             List<CartItemDto> listResponse = new ArrayList<>();
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();

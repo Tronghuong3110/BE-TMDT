@@ -62,7 +62,7 @@ public class PromotionService implements IPromotionService {
             BeanUtils.copyProperties(promotion, promotionDto);
             response.put("code", 1);
             response.put("message", "Add new promotion success");
-            response.put("promotion", promotion);
+            response.put("promotion", promotionDto);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -174,15 +174,18 @@ public class PromotionService implements IPromotionService {
                     itemRepository.save(item);
                 }
             }
+            BeanUtils.copyProperties(promotion, promotionDto);
             response.put("code", 1);
             response.put("message", "Update promotion success");
             response.put("listItem", listResponse);
+            response.put("promotiom", promotionDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 1);
             response.put("message", "Update promotion fail");
             response.put("listItem", new ArrayList<>());
+            response.put("promotiom", new PromotionDto());
         }
         return response;
     }

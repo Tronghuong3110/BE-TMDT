@@ -15,5 +15,5 @@ public interface CartRepository extends JpaRepository<CartEntity, Integer> {
     @Query(value = "select * from cart where user_id = :userId order by unix_time limit 1", nativeQuery = true)
     Optional<CartEntity> findByUserAndOrdered(@Param("userId") Integer userId);
 
-    Optional<CartEntity> findByUser_IdAndOrdered(Integer id, Boolean ordered);
+    Optional<CartEntity> findAllByUserId(Integer id);
 }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OrderRepository extends JpaRepository<OrderEntity, Integer> {
+public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     @Query(value = "select * from orders where (:userId is null or user_id = :userId) ", nativeQuery = true)
     List<OrderEntity> findAllByUserId(@Param("userId")Integer userId);
