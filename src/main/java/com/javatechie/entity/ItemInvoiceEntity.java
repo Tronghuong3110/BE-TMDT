@@ -9,8 +9,7 @@ import lombok.Data;
 public class ItemInvoiceEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Column(name = "quantity")
     private Integer quantity;
     @Column(name = "import_price")

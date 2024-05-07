@@ -2,15 +2,14 @@ package com.javatechie.service.impl;
 
 import com.javatechie.config.ConfigPaymentOnline;
 import com.javatechie.config.UserInfoUserDetails;
-import com.javatechie.dto.CartItemDto;
-import com.javatechie.dto.ItemDto;
-import com.javatechie.dto.OrderDto;
+import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IOrderService;
 import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,18 +37,36 @@ public class OrderService implements IOrderService {
     private UserVoucherRepository userVoucherRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
+    @Autowired
+    private ItemRepository itemRepository;
 
     // lấy ra danh sách đơn hàng đã đặt (dành cho admin)
     @Override
     public List<OrderDto> findAllOrder() {
         try {
-            List<OrderEntity> listOrder = orderRepository.findAll();
+            UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            List<OrderEntity> listOrder = new ArrayList<>();
+            if(user.getRoles().contains("ADMIN")) {
+                listOrder = orderRepository.findAll();
+            }
+            else {
+                listOrder = orderRepository.findAllByUserId(user.getId());
+            }
             List<OrderDto> listResponse = new ArrayList<>();
             for(OrderEntity order : listOrder) {
                 OrderDto orderDto = new OrderDto();
                 BeanUtils.copyProperties(order, orderDto);
                 String nameUser = order.getUser().getName();
                 orderDto.setNameUser(nameUser);
+                // lấy ra shipment
+                ShipmentDto shipmentDto = new ShipmentDto();
+                BeanUtils.copyProperties(order.getShipment(), shipmentDto);
+                // lấy ra payment
+                PaymentDto paymentDto = new PaymentDto();
+                BeanUtils.copyProperties(order.getPayment(), paymentDto);
+                orderDto.setShipment(shipmentDto);
+                orderDto.setPayment(paymentDto);
                 listResponse.add(orderDto);
             }
             return listResponse;
@@ -70,10 +87,20 @@ public class OrderService implements IOrderService {
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();
                 BeanUtils.copyProperties(cartItem, cartItemDto);
-                ItemDetailEntity item = cartItem.getItem();
+                // xét itemDetail
+                ItemDetailEntity itemDetail = cartItem.getItem();
+                ItemDetailDto itemDetailDto = new ItemDetailDto();
+                BeanUtils.copyProperties(itemDetail, itemDetailDto);
+                // xet item
+                ItemEntity item = itemDetail.getItem();
                 ItemDto itemDto = new ItemDto();
                 BeanUtils.copyProperties(item, itemDto);
-                cartItemDto.setItemDto(itemDto);
+
+                itemDetailDto.setItemDto(itemDto);
+
+                double totalPrice = cartItem.getQuantity() * itemDetail.getPrice();
+                cartItemDto.setPrice(totalPrice);
+                cartItemDto.setItemDetail(itemDetailDto);
                 listResponse.add(cartItemDto);
             }
             return listResponse;
@@ -116,6 +143,7 @@ public class OrderService implements IOrderService {
             for(Integer idCartItem : orderDto.getItemOrders()) {
                 CartItemEntity cartItem = cartItemRepository.findById(idCartItem).orElse(new CartItemEntity());
                 cartItem.setOrder(order);
+                cartItem.setOrdered(1);
                 cartItemRepository.save(cartItem);
             }
             BeanUtils.copyProperties(order, orderDto);

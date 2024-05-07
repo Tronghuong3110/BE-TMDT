@@ -60,4 +60,13 @@ public class VoucherController {
         }
         return ResponseEntity.ok(response);
     }
+    // thêm mới voucher cho user
+    @GetMapping("/api/user/voucher")
+    public ResponseEntity<?> createUserVoucher(@RequestParam("idVoucher") Integer idVoucher) {
+        JSONObject response = voucherService.createVoucherUser(idVoucher);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 }

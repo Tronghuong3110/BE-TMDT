@@ -11,4 +11,5 @@ public interface IVoucherService {
     JSONObject findOne(Integer id);
     JSONObject updateVoucher(VoucherDto voucherDto);
     JSONObject deleteVoucher(Integer id);
+    JSONObject createVoucherUser(Integer idVoucher);
 }

@@ -11,7 +11,6 @@ public class OrderDto {
     private Long id;
     private Date createDate;
     private long totalPrice;
-    private Double promotionMoney;
     private String statusPayment;
     private String nameUser;
     private String address;

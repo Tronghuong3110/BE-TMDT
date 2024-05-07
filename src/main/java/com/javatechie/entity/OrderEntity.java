@@ -39,7 +39,7 @@ public class OrderEntity {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<CartItemEntity> cartItems;
     @OneToOne
     @JoinColumn(name = "payment_id")

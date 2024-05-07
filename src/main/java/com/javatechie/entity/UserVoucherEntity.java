@@ -1,13 +1,17 @@
 package com.javatechie.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 
 @Entity
 @Table(name = "user_voucher")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserVoucherEntity {
 
     @Id

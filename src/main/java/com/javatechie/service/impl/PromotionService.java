@@ -178,14 +178,14 @@ public class PromotionService implements IPromotionService {
             response.put("code", 1);
             response.put("message", "Update promotion success");
             response.put("listItem", listResponse);
-            response.put("promotiom", promotionDto);
+            response.put("promotion", promotionDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 1);
             response.put("message", "Update promotion fail");
             response.put("listItem", new ArrayList<>());
-            response.put("promotiom", new PromotionDto());
+            response.put("promotion", new PromotionDto());
         }
         return response;
     }

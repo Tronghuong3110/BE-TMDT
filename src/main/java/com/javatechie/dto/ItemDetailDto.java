@@ -14,4 +14,5 @@ public class ItemDetailDto {
     private String screenSize;
     private String diskSize;
     private String ram;
+    private ItemDto itemDto;
 }

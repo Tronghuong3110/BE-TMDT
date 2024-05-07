@@ -11,14 +11,15 @@ import java.util.List;
 public class SupplierEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Column(name = "name")
     private String name;
     @Column(name = "description", columnDefinition = "text")
     private String description;
     @Column(name = "phonenumber")
     private String phoneNumber;
+    @Column(name = "deleted")
+    private Integer deleted;
 
     @OneToMany(mappedBy = "supplier")
     private List<ImportInvoiceEntity> invoices;

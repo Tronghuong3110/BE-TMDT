@@ -26,7 +26,6 @@ public class OrderController {
     }
 
     @GetMapping("/order")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public List<CartItemDto> findAllItemOfOrder(@RequestParam("orderId")long orderId) {
         return orderService.getListItemOfOrder(orderId);
     }
