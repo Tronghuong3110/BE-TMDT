@@ -37,8 +37,6 @@ public class OrderService implements IOrderService {
     private UserVoucherRepository userVoucherRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
-    @Autowired
-    private ItemRepository itemRepository;
 
     // lấy ra danh sách đơn hàng đã đặt (dành cho admin)
     @Override
@@ -82,28 +80,28 @@ public class OrderService implements IOrderService {
     public List<CartItemDto> getListItemOfOrder(Long orderId) {
         try {
             OrderEntity order = orderRepository.findById(orderId).orElse(null);
-            List<CartItemEntity> listCartItem = order.getCartItems();
-            List<CartItemDto> listResponse = new ArrayList<>();
-            for(CartItemEntity cartItem : listCartItem) {
-                CartItemDto cartItemDto = new CartItemDto();
-                BeanUtils.copyProperties(cartItem, cartItemDto);
-                // xét itemDetail
-                ItemDetailEntity itemDetail = cartItem.getItem();
-                ItemDetailDto itemDetailDto = new ItemDetailDto();
-                BeanUtils.copyProperties(itemDetail, itemDetailDto);
-                // xet item
-                ItemEntity item = itemDetail.getItem();
-                ItemDto itemDto = new ItemDto();
-                BeanUtils.copyProperties(item, itemDto);
-
-                itemDetailDto.setItemDto(itemDto);
-
-                double totalPrice = cartItem.getQuantity() * itemDetail.getPrice();
-                cartItemDto.setPrice(totalPrice);
-                cartItemDto.setItemDetail(itemDetailDto);
-                listResponse.add(cartItemDto);
-            }
-            return listResponse;
+//            List<CartItemEntity> listCartItem = order.getCartItems();
+//            List<CartItemDto> listResponse = new ArrayList<>();
+//            for(CartItemEntity cartItem : listCartItem) {
+//                CartItemDto cartItemDto = new CartItemDto();
+//                BeanUtils.copyProperties(cartItem, cartItemDto);
+//                // xét itemDetail
+//                ItemDetailEntity itemDetail = cartItem.getItem();
+//                ItemDetailDto itemDetailDto = new ItemDetailDto();
+//                BeanUtils.copyProperties(itemDetail, itemDetailDto);
+//                // xet item
+//                ItemEntity item = itemDetail.getItem();
+//                ItemDto itemDto = new ItemDto();
+//                BeanUtils.copyProperties(item, itemDto);
+//
+//                itemDetailDto.setItemDto(itemDto);
+//
+//                double totalPrice = cartItem.getQuantity() * itemDetail.getPrice();
+//                cartItemDto.setPrice(totalPrice);
+//                cartItemDto.setItemDetail(itemDetailDto);
+//                listResponse.add(cartItemDto);
+//            }
+//            return listResponse;
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -48,4 +48,6 @@ public class User {
     private List<NotificationEntity> notifies;
     @OneToMany(mappedBy = "user")
     private List<UserVoucherEntity> userVouchers;
+    @OneToMany(mappedBy = "user")
+    private List<UserAddressEntity> userAddresses;
 }

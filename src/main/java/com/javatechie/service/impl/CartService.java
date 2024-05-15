@@ -2,8 +2,6 @@ package com.javatechie.service.impl;
 
 import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.CartItemDto;
-import com.javatechie.dto.ItemDetailDto;
-import com.javatechie.dto.ItemDto;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.ICartService;
@@ -21,13 +19,9 @@ import java.util.List;
 public class CartService implements ICartService {
 
     @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
     private CartItemRepository cartItemRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
-    @Autowired
-    private ItemDetailRepository itemDetailRepository;
     @Autowired
     private CartRepository cartRepository;
 
@@ -37,12 +31,12 @@ public class CartService implements ICartService {
         JSONObject response = new JSONObject();
         try {
             CartItemEntity cartItem = new CartItemEntity();
-            ItemDetailEntity itemDetail = itemDetailRepository.findByIdAndIsAvailableAndDeleted(cartItemDto.getItemDetail().getId(), true, 0).orElse(null);
-            if(itemDetail == null) {
+//            ItemDetailEntity itemDetail = itemDetailRepository.findByIdAndIsAvailableAndDeleted(cartItemDto.getItemDetail().getId(), true, 0).orElse(null);
+//            if(itemDetail == null) {
                 response.put("code", 0);
-                response.put("message", "Can not found itemDetail by id = " + cartItemDto.getItemDetail().getId());
-                return response;
-            }
+//                response.put("message", "Can not found itemDetail by id = " + cartItemDto.getItemDetail().getId());
+//                return response;
+//            }
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(null);
             if(user == null) {
@@ -58,7 +52,7 @@ public class CartService implements ICartService {
                 cart.setUnixTime(System.currentTimeMillis());
                 cart = cartRepository.save(cart);
             }
-            cartItem.setItem(itemDetail);
+//            cartItem.setItem(itemDetail);
             cartItem.setQuantity(cartItemDto.getQuantity());
             cartItem.setCart(cart);
             cartItem = cartItemRepository.save(cartItem);
@@ -89,17 +83,17 @@ public class CartService implements ICartService {
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();
                 BeanUtils.copyProperties(cartItem, cartItemDto);
-                Double price = Math.round(cartItem.getItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
-                cartItemDto.setPrice(price);
+//                Double price = Math.round(cartItem.getItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+//                cartItemDto.setPrice(price);
 
-                ItemDto itemDto = new ItemDto();
-                ItemEntity item = cartItem.getItem().getItem();
-                BeanUtils.copyProperties(item, itemDto);
-                cartItemDto.setItemDto(itemDto);
-
-                ItemDetailDto itemDetailDto = new ItemDetailDto();
-                BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
-                cartItemDto.setItemDetail(itemDetailDto);
+//                ItemDto itemDto = new ItemDto();
+//                ItemEntity item = cartItem.getItem().getItem();
+//                BeanUtils.copyProperties(item, itemDto);
+//                cartItemDto.setItemDto(itemDto);
+//
+//                ItemDetailDto itemDetailDto = new ItemDetailDto();
+//                BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
+//                cartItemDto.setItemDetail(itemDetailDto);
 
                 listResponse.add(cartItemDto);
             }

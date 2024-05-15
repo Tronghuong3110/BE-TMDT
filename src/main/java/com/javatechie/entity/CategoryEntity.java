@@ -20,5 +20,7 @@ public class CategoryEntity {
     private String code;
 
     @OneToMany(mappedBy = "category")
-    private List<ItemEntity> items;
+    private List<ProductEntity> products;
+    @OneToMany(mappedBy = "category")
+    private List<VariationEntity> variations;
 }

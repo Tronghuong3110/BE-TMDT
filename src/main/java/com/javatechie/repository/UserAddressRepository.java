@@ -1,9 +1,9 @@
 package com.javatechie.repository;
 
-import com.javatechie.entity.ImportInvoiceEntity;
+import com.javatechie.entity.UserAddressEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ImportInvoiceRepository extends JpaRepository<ImportInvoiceEntity, Long> {
+public interface UserAddressRepository extends JpaRepository<UserAddressEntity, Long> {
 }

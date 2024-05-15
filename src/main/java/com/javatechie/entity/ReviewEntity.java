@@ -22,8 +22,8 @@ public class ReviewEntity {
     private Date dateReview;
 
     @ManyToOne
-    @JoinColumn(name = "item_id")
-    private ItemEntity item;
+    @JoinColumn(name = "product_id")
+    private ProductEntity product;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

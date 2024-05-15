@@ -1,8 +1,9 @@
 package com.javatechie.dto;
 
 import lombok.Data;
+
 @Data
-public class ItemViewedDto {
+public class VariationOptionDto {
     private Long id;
-    private ProductDto item;
+    private String value;
 }

@@ -22,5 +22,8 @@ public class SupplierEntity {
     private Integer deleted;
 
     @OneToMany(mappedBy = "supplier")
-    private List<ImportInvoiceEntity> invoices;
+    private List<InvoiceEntity> invoices;
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private AddressEntity address;
 }

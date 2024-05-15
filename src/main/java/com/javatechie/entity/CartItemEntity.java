@@ -18,8 +18,8 @@ public class CartItemEntity {
     private Integer ordered;
 //
     @OneToOne
-    @JoinColumn(name = "item_id")
-    private ItemDetailEntity item;
+    @JoinColumn(name = "product_item_id")
+    private ProductItemEntity productItem;
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private CartEntity cart;

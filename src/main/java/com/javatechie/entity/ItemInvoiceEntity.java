@@ -14,12 +14,4 @@ public class ItemInvoiceEntity {
     private Integer quantity;
     @Column(name = "import_price")
     private Integer importPrice;
-
-    @ManyToOne
-    @JoinColumn(name = "item_id")
-    private ItemDetailEntity item;
-
-    @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private ImportInvoiceEntity invoice;
 }

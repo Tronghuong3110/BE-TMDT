@@ -7,6 +7,5 @@ public class CartItemDto {
     private Integer id;
     private Integer quantity;
     private Double price; //
-    private ItemDto itemDto;
-    private ItemDetailDto itemDetail;
+    private ProductDto productDto;
 }

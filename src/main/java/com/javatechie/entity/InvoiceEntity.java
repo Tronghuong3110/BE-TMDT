@@ -1,22 +1,26 @@
 package com.javatechie.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.util.List;
 
-@Entity
 @Data
-@Table(name = "import_invoice")
-public class ImportInvoiceEntity {
+@Entity
+@Table(name = "invoice")
+public class InvoiceEntity {
+
     @Id
     private Long id;
-    @Column(name = "import_date")
-    private Date importDate;
+    @Column(name = "create_date")
+    private Date createDate;
 
     @OneToMany(mappedBy = "invoice")
-    List<ItemInvoiceEntity> itemInvoices;
+    private List<ProductItemInvoiceEntity> productItemInvoices;
+
     @ManyToOne
     @JoinColumn(name = "supplier_id")
     private SupplierEntity supplier;

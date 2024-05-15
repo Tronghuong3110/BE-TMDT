@@ -14,7 +14,8 @@ public class PromotionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Column(name = "content", columnDefinition = "text")
-    private String content;
+    private String name;
+    private String description;
     @Column(name = "date_start")
     private Date dateStart;
     @Column(name = "date_end")
@@ -27,7 +28,8 @@ public class PromotionEntity {
     private Integer deleted;
 
     @OneToMany(mappedBy = "promotion")
-    private List<ItemEntity> items;
-    @OneToMany(mappedBy = "promotion")
     private List<NotificationEntity> notifications;
+
+    @ManyToMany(mappedBy = "promotions")
+    private List<ProductItemEntity> productItems;
 }

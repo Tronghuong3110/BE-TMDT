@@ -15,6 +15,6 @@ public class ImageEntity {
     private String path;
 
     @ManyToOne
-    @JoinColumn(name = "item_id")
-    private ItemEntity itemEntity;
+    @JoinColumn(name = "product_id")
+    private ProductEntity product;
 }
