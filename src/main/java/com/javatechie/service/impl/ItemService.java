@@ -5,20 +5,29 @@ import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IItemService;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.modelmapper.Conditions;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.ListeningSecurityContextHolderStrategy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.lang.reflect.Field;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ItemService implements IItemService {
@@ -119,7 +128,7 @@ public class ItemService implements IItemService {
                 response.put("message", "Can not update item because of can not found category and brand");
                 return response;
             }
-            ItemEntity itemEntity = itemRepository.findByIdAndDeleted(item.getId(), 0).orElse(new ItemEntity());
+            ItemEntity itemEntity = itemRepository.findByIdAndDeleted(item.getId(), 0).orElse(null);
             if(itemEntity == null) {
                 response.put("code", 0);
                 response.put("message", "Can not found item with id = " + item.getId());
@@ -316,7 +325,10 @@ public class ItemService implements IItemService {
 
     private <T extends ItemEntity> T updateItem(ItemDto itemDto, CategoryEntity category, BrandEntity brand, T item) {
         try {
-            BeanUtils.copyProperties(itemDto, item);
+//            BeanUtils.copyProperties(itemDto, item);
+            ModelMapper modelMapper = MapperUtil.configModelMapper();
+            modelMapper.map(itemDto, item);
+
             if (!category.getId().equals(item.getCategory().getId())) {
                 item.setCategory(category);
             }
@@ -324,9 +336,31 @@ public class ItemService implements IItemService {
                 item.setBrand(brand);
             }
             item = itemRepository.save(item);
+
+            // loại bỏ những image người dùng đã xóa
+            List<Integer> idOlds = itemDto.getImages()
+                    .stream()
+                    .filter(image -> image.getId() != null)
+                    .map(ImageDto::getId)
+                    .collect(Collectors.toList());
+
+            List<ImageEntity> listImageOld = imageRepository.findAllByItemEntity(item);
+            for(ImageEntity image : listImageOld) {
+                if(!idOlds.contains(image.getId())) {
+                    imageRepository.delete(image);
+                }
+            }
+            // thêm mới image mới hoặc update lại path của image cũ
             for(ImageDto image : itemDto.getImages()) {
-                ImageEntity imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+                ImageEntity imageEntity = null;
+                if(image.getId() != null) {
+                    imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+                }
+                else {
+                    imageEntity = new ImageEntity();
+                }
                 BeanUtils.copyProperties(image, imageEntity);
+                imageEntity.setItemEntity(item);
                 imageRepository.save(imageEntity);
             }
             return item;

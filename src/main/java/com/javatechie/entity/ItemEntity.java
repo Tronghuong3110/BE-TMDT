@@ -11,29 +11,29 @@ import java.util.List;
 public class ItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    protected Integer id;
     @Column(name = "vendor")
-    private String vendor; // nhà sản xuất
+    protected String vendor; // nhà sản xuất
     @Column(name = "name")
-    private String name;
-    @Column(name = "description", columnDefinition = "text")
-    private String description;
+    protected String name;
+    @Column(name = "description", columnDefinition = "longtext")
+    protected String description;
     @Column(name = "deleted")
-    private Integer deleted;
+    protected Integer deleted;
 
     @OneToMany(mappedBy = "item")
-    private List<ItemDetailEntity> itemDetails;
+    protected List<ItemDetailEntity> itemDetails;
     @OneToMany(mappedBy = "itemEntity")
-    private List<ImageEntity> images;
+    protected List<ImageEntity> images;
     @OneToMany(mappedBy = "item")
-    private List<ReviewEntity> reviews;
+    protected List<ReviewEntity> reviews;
     @ManyToOne
     @JoinColumn(name = "brand_id")
-    private BrandEntity brand;
+    protected BrandEntity brand;
     @ManyToOne
     @JoinColumn(name = "category_id")
-    private CategoryEntity category;
+    protected CategoryEntity category;
     @ManyToOne
     @JoinColumn(name = "promotion_id")
-    private PromotionEntity promotion;
+    protected PromotionEntity promotion;
 }
