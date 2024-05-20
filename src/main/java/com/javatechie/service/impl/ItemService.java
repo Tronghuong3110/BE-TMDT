@@ -325,7 +325,7 @@ public class ItemService implements IItemService {
             }
             item = itemRepository.save(item);
             for(ImageDto image : itemDto.getImages()) {
-                ImageEntity imageEntity = imageRepository.findById(image.getId()).orElse(null);
+                ImageEntity imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
                 BeanUtils.copyProperties(image, imageEntity);
                 imageRepository.save(imageEntity);
             }
