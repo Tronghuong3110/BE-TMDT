@@ -36,13 +36,13 @@ public class UserService implements IUserService {
                 response.put("message", "Username can not null");
                 return response;
             }
-            Boolean checkUsername = checkUsernameExist(user.getUsername());
+            boolean checkUsername = checkUsernameExist(user.getUsername());
             if(checkUsername) { // email đã tồn tại trong cơ sở dữ liệu
                 response.put("message", "Username already exists ");
                 return response;
             }
             // kiểm tra password có hợp lệ không
-            Boolean checkPassword = CheckPassWord.isStrongPassword(user.getPassword());
+            boolean checkPassword = CheckPassWord.isStrongPassword(user.getPassword());
             if(!checkPassword) { // password không hợp lệ
                 response.put("message", "Password is not valid");
                 return response;

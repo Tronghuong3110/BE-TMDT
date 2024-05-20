@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface VoucherRepository extends JpaRepository<VoucherEntity, Integer> {
     Boolean existsByName(String name);
     List<VoucherEntity> findAllByDeleted(Integer id);
-    @Query(value = "select * from voucher where (:id is null or id = :id) and deleted = 0 and :date <= end_date", nativeQuery = true)
+    @Query(value = "select * from voucher where (:id is null or id = :id) and deleted = 0 and (:date is null or :date <= end_date)", nativeQuery = true)
     List<VoucherEntity> findById(@Param("id") Integer id,@Param("date") Date dateTime);
     Optional<VoucherEntity> findByNameAndDeleted(String name, Integer deleted);
 }
