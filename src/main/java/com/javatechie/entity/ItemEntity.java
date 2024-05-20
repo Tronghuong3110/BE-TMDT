@@ -21,11 +21,11 @@ public class ItemEntity {
     @Column(name = "deleted")
     protected Integer deleted;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     protected List<ItemDetailEntity> itemDetails;
-    @OneToMany(mappedBy = "itemEntity")
+    @OneToMany(mappedBy = "itemEntity", fetch = FetchType.LAZY)
     protected List<ImageEntity> images;
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     protected List<ReviewEntity> reviews;
     @ManyToOne
     @JoinColumn(name = "brand_id")
