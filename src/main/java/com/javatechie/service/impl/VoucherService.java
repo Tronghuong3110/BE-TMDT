@@ -67,10 +67,10 @@ public class VoucherService implements IVoucherService {
     }
 
     @Override
-    public List<VoucherDto> findAll() {
+    public List<VoucherDto> findAll(Date date) {
         try {
-            System.out.println(new Date(System.currentTimeMillis()));
-            List<VoucherEntity> listVouchers = voucherRepository.findById(null, new Date(System.currentTimeMillis()));
+//            System.out.println(new Date(System.currentTimeMillis()));
+            List<VoucherEntity> listVouchers = voucherRepository.findById(null, date);
             List<VoucherDto> listResponse = new ArrayList<>();
             for(VoucherEntity voucher : listVouchers) {
                 VoucherDto voucherDto = new VoucherDto();
