@@ -134,7 +134,7 @@ public class ItemService implements IItemService {
                 response.put("message", "Can not found item with id = " + item.getId());
                 return response;
             }
-//            itemEntity.setImages(null);
+            itemEntity.setImages(null);
             itemEntity = updateItem(item, category, brand, itemEntity);
             BeanUtils.copyProperties(itemEntity, item);
 //            CategoryDto categoryDto = new CategoryDto();
