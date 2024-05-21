@@ -35,6 +35,7 @@ public class LoginController {
                 UserInfoUserDetails userDetails = (UserInfoUserDetails) authentication.getPrincipal();
                 jsonObject.put("token", jwtService.generateToken(userDto.getUsername()));
                 jsonObject.put("role", userDetails.getRoles());
+                jsonObject.put("name", userDetails.getName());
                 return ResponseEntity.ok(jsonObject);
             }
             jsonObject.put("code", 0);

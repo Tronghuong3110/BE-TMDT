@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class UserInfoUserDetails implements UserDetails {
     private String username;
     private String password;
+    private String name;
     private String roles;
     private List<GrantedAuthority> authorities;
 
@@ -27,6 +28,7 @@ public class UserInfoUserDetails implements UserDetails {
         authorities= Arrays.stream(user.getRoles().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+        this.name = user.getName();
         this.roles = user.getRoles();
     }
 
