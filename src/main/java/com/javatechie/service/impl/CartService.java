@@ -7,12 +7,15 @@ import com.javatechie.dto.ItemDto;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.ICartService;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.ModelMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,8 +65,20 @@ public class CartService implements ICartService {
             cartItem.setQuantity(cartItemDto.getQuantity());
             cartItem.setCart(cart);
             cartItem = cartItemRepository.save(cartItem);
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(cartItem, cartItemDto);
+            ItemDetailDto itemDetailDto = new ItemDetailDto();
+            mapper.map(itemDetail, itemDetailDto);
+            ItemEntity item = itemDetail.getItem();
+            ItemDto itemDto = new ItemDto();
+            mapper.map(item, itemDto);
+            itemDetailDto.setItemDto(itemDto);
+//            itemDetailDto.setItemDto(itemDto);
+            cartItemDto.setItemDetail(null);
+            cartItemDto.setItemDto(itemDto);
+            cartItemDto.setPrice(itemDetail.getPrice() * cartItemDto.getQuantity());
             response.put("code", 1);
-            response.put("item", cartItem);
+            response.put("item", cartItemDto);
             response.put("message", "Add item to cart success");
 //            response.put("cartItem", cartItem);
         }

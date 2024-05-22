@@ -31,12 +31,12 @@ public class ItemDetailEntity {
     @Column(name = "deleted")
     private Integer deleted;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private ItemEntity item;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     List<ItemInvoiceEntity> invoices;
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY)
     private List<CartItemEntity> cartItem;
 }
