@@ -7,7 +7,9 @@ import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.service.IUserService;
 import com.javatechie.util.CheckPassWord;
 import com.javatechie.util.ConstUtil;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -144,9 +146,11 @@ public class UserService implements IUserService {
         try {
             UserInfoUserDetails userInfo = new UserInfoUserDetails();
             // Th chỉnh sửa thông tin user đang đăng nhập
+            System.out.println(userDto.getId());
             if(userDto.getId() == null) {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 userInfo = (UserInfoUserDetails) auth.getPrincipal();
+                System.out.println("Username: " + userInfo.getUsername());
                 user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(null);
             }
             // TH chỉnh sửa thông tin user do admin chính sửa
@@ -158,20 +162,32 @@ public class UserService implements IUserService {
                 response.put("message", "Can not change information of user");
                 return response;
             }
-            user = convertFromDtoToEntity(userDto, user);
-            if(user == null) {
-                response.put("code", 0);
-                response.put("message", "Can not change information");
-                return response;
-            }
             // TH thay đổi password ==> check lại điều kiện password
             if (userDto.getPassword() != null) {
-                Boolean checkPassword = CheckPassWord.isStrongPassword(userDto.getPassword());
+                boolean checkPassword = CheckPassWord.isStrongPassword(userDto.getPassword());
                 if(!checkPassword) {
                     response.put("code", 0);
                     response.put("message", "Password invalidate");
                     return response;
                 }
+                boolean checkMatcherPassword = passwordEncoder.matches(userDto.getPasswordOld(), user.getPassword());
+                if(!checkMatcherPassword) {
+                    response.put("code", 0);
+                    response.put("message", "Mât khẩu không đúng");
+                    return response;
+                }
+                // TH userDto có id ==> là admin đang truy cập ==> không được phéo đổi pass
+                if(userDto.getId() != null) {
+                    response.put("code", 0);
+                    response.put("message", "Admin không thể thay đổi mật khẩu của user");
+                    return response;
+                }
+            }
+            user = convertFromDtoToEntity(userDto, user);
+            if(user == null) {
+                response.put("code", 0);
+                response.put("message", "Can not change information");
+                return response;
             }
             user.setModifiedDate(new Date(System.currentTimeMillis()));
             userInfoRepository.save(user);
@@ -231,7 +247,8 @@ public class UserService implements IUserService {
 
     private User convertFromDtoToEntity(UserDto userDto, User user) {
         try {
-            BeanUtils.copyProperties(userDto, user);
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(userDto, user);
             if(userDto.getPassword() != null) {
                 user.setPassword(passwordEncoder.encode(userDto.getPassword()));
             }

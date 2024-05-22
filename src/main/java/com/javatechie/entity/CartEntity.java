@@ -16,9 +16,9 @@ public class CartEntity {
     @Column(name = "unix_time")
     private Long unixTime;
 
-    @OneToMany(mappedBy = "cart")
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
     private List<CartItemEntity> cartItems;
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }
