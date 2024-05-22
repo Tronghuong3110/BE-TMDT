@@ -185,12 +185,15 @@ public class VoucherService implements IVoucherService {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
             UserVoucherEntity oldVoucherUser = userVoucherRepository.findByUser_IdAndVoucher_Id(user.getId(), voucher.getId()).orElse(null);
-            if(oldVoucherUser == null) {
-                UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), false, user, voucher, null);
-                userVoucherEntity = userVoucherRepository.save(userVoucherEntity);
-                voucher.setNumberRemain(voucher.getNumberRemain()-1);
-                voucherRepository.save(voucher);
+            if(oldVoucherUser != null) {
+                response.put("code", 0);
+                response.put("message", "Bạn đã có voucher này trong danh sách voucher của mình!!");
+                return response;
             }
+            UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), false, user, voucher, null);
+            userVoucherEntity = userVoucherRepository.save(userVoucherEntity);
+            voucher.setNumberRemain(voucher.getNumberRemain()-1);
+            voucherRepository.save(voucher);
             response.put("code", 1);
             response.put("message", "Create voucher success");
         }
