@@ -171,6 +171,7 @@ public class CartService implements ICartService {
             ItemEntity item = cartItem.getItem().getItem();
             mapper.map(item, itemDto);
             itemDto.setItemDetails(null);
+            itemDto.setReviews(null);
             CategoryEntity category = item.getCategory();
             CategoryDto categoryDto = new CategoryDto();
             mapper.map(category, categoryDto);

@@ -11,7 +11,7 @@ import java.sql.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewDto {
-    private Integer id;
+    private Long id;
     private Integer ranking;
     private Date dateReview;
 }
