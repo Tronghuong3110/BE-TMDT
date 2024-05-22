@@ -45,6 +45,8 @@ public class ItemService implements IItemService {
     private UserInfoRepository userInfoRepository;
     @Autowired
     private ItemViewedRepository itemViewedRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
     @Override
     public JSONObject saveItem(ItemDto item, Integer categoryId, Integer brandId) {
         JSONObject response = new JSONObject();
@@ -252,6 +254,8 @@ public class ItemService implements IItemService {
                 CategoryDto category = new CategoryDto();
                 BeanUtils.copyProperties(item.getCategory(), category);
                 itemDto.setCategoryDto(category);
+                JSONObject avgRaking = reviewRepository.calculatorAvgRakingByItem(item.getId());
+                itemDto.setRaking(avgRaking == null ? 0 : Double.parseDouble(avgRaking.get("rating").toString()));
                 listResponse.add(itemDto);
             }
             return listResponse;

@@ -27,9 +27,12 @@ public class ItemDto {
     // thông tin của phụ kiện
     private String connectType; // kiểu kết nối của phụ kiện
     private String specialProperties;
+    private Double raking;
     // danh sách ảnh của sản phẩm
     List<ImageDto> images;
     // danh sách thông tin chi tiết của sản phẩm
     List<ItemDetailDto> itemDetails;
+    List<ReviewDto> reviews;
+    List<CommentDto> comments;
     CategoryDto categoryDto;
 }

@@ -6,7 +6,9 @@ import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IOrderService;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -81,26 +83,31 @@ public class OrderService implements IOrderService {
     @Override
     public List<CartItemDto> getListItemOfOrder(Long orderId) {
         try {
-            OrderEntity order = orderRepository.findById(orderId).orElse(null);
+            OrderEntity order = orderRepository.findById(orderId).orElse(new OrderEntity());
             List<CartItemEntity> listCartItem = order.getCartItems();
             List<CartItemDto> listResponse = new ArrayList<>();
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();
-                BeanUtils.copyProperties(cartItem, cartItemDto);
-                // xét itemDetail
-                ItemDetailEntity itemDetail = cartItem.getItem();
-                ItemDetailDto itemDetailDto = new ItemDetailDto();
-                BeanUtils.copyProperties(itemDetail, itemDetailDto);
-                // xet item
-                ItemEntity item = itemDetail.getItem();
+                ModelMapper mapper = MapperUtil.configModelMapper();
+                mapper.map(cartItem, cartItemDto);
+                Double price = Math.round(cartItem.getItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+                cartItemDto.setPrice(price);
+
                 ItemDto itemDto = new ItemDto();
-                BeanUtils.copyProperties(item, itemDto);
+                ItemEntity item = cartItem.getItem().getItem();
+                mapper.map(item, itemDto);
+                itemDto.setItemDetails(null);
+                CategoryEntity category = item.getCategory();
+                CategoryDto categoryDto = new CategoryDto();
+                mapper.map(category, categoryDto);
+                categoryDto.setItems(null);
+                itemDto.setCategoryDto(categoryDto);
+                cartItemDto.setItemDto(itemDto);
 
-                itemDetailDto.setItemDto(itemDto);
-
-                double totalPrice = cartItem.getQuantity() * itemDetail.getPrice();
-                cartItemDto.setPrice(totalPrice);
+                ItemDetailDto itemDetailDto = new ItemDetailDto();
+                BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
                 cartItemDto.setItemDetail(itemDetailDto);
+
                 listResponse.add(cartItemDto);
             }
             return listResponse;
@@ -121,6 +128,7 @@ public class OrderService implements IOrderService {
             PaymentEntity payment = paymentRepository.findById(paymentMethod).orElse(new PaymentEntity());
             String statusPayment;
             Date datePayment = null;
+            System.out.println("Code: " + payment.getCode());
             if(payment.getCode().equals("cash")) {
                 statusPayment = "Chưa thanh toán";
             }
@@ -131,7 +139,7 @@ public class OrderService implements IOrderService {
             // lấy ra method vận chuyển
             ShipmentEntity shipment = shipmentRepository.findById(shipmentMethod).orElse(new ShipmentEntity());
             // lấy ra voucher của user
-            UserVoucherEntity voucher = userVoucherRepository.findById(voucherId).orElse(new UserVoucherEntity());
+            UserVoucherEntity voucher = userVoucherRepository.findById(voucherId).orElse(null);
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
 
