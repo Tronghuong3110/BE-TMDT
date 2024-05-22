@@ -41,7 +41,7 @@ public class SupplierController {
         return ResponseEntity.ok(supplier);
     }
     @GetMapping("/suppliers")
-    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    @PreAuthorize("hasAuthority({'EMPLOYEE', 'ADMIN'})")
     public ResponseEntity<?> findAll() {
         List<SupplierDto> suppliers = supplierService.findAllSupplier();
         return ResponseEntity.ok(suppliers);
