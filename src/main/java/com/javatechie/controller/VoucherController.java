@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -71,6 +72,16 @@ public class VoucherController {
         JSONObject response = voucherService.createVoucherUser(idVoucher);
         if(response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    // Lấy ra danh sách voucher của user
+    @GetMapping("/api/user/vouchers")
+    public ResponseEntity<?> findAllVoucherOfUser() {
+        List<VoucherDto> response = voucherService.findAllVoucherOfUser();
+        if(response == null) {
+            return ResponseEntity.badRequest().body(new ArrayList<>());
         }
         return ResponseEntity.ok(response);
     }

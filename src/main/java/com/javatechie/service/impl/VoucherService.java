@@ -9,10 +9,13 @@ import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.repository.UserVoucherRepository;
 import com.javatechie.repository.VoucherRepository;
 import com.javatechie.service.IVoucherService;
+import com.javatechie.util.MapperUtil;
 import org.aspectj.weaver.ast.Literal;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.server.Jsp;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -194,6 +197,30 @@ public class VoucherService implements IVoucherService {
             response.put("message", "Create voucher fail");
         }
         return response;
+    }
+
+    @Override
+    public List<VoucherDto> findAllVoucherOfUser() {
+        JSONObject response = new JSONObject();
+        try {
+            UserInfoUserDetails userInfo = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(new User());
+            List<UserVoucherEntity> listVoucherEntity = userVoucherRepository.findAllByUser_IdAndDateEnd(user.getId());
+            List<VoucherDto> vouchers = new ArrayList<>();
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            for(UserVoucherEntity voucher : listVoucherEntity) {
+                VoucherEntity voucherEntity = voucher.getVoucher();
+                VoucherDto voucherDto = new VoucherDto();
+                mapper.map(voucherEntity, voucherDto);
+                voucherDto.setIdItems(null);
+                vouchers.add(voucherDto);
+            }
+            return vouchers;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private VoucherEntity convertToEntity(VoucherEntity voucher, VoucherDto voucherDto) {
