@@ -63,13 +63,15 @@ public class CartService implements ICartService {
             cartItem.setCart(cart);
             cartItem = cartItemRepository.save(cartItem);
             response.put("code", 1);
+            response.put("item", cartItem);
             response.put("message", "Add item to cart success");
 //            response.put("cartItem", cartItem);
         }
         catch (Exception e) {
             e.printStackTrace();
-            response.put("code", 1);
-            response.put("message", "Add item to cart success");
+            response.put("code", 0);
+            response.put("message", "Add item to cart fail");
+            response.put("item", null);
         }
         return response;
     }

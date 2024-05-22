@@ -37,6 +37,6 @@ public class ItemDetailEntity {
 
     @OneToMany(mappedBy = "item")
     List<ItemInvoiceEntity> invoices;
-    @OneToOne(mappedBy = "item")
-    private CartItemEntity cartItem;
+    @OneToMany(mappedBy = "item")
+    private List<CartItemEntity> cartItem;
 }
