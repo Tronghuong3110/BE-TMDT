@@ -2,6 +2,7 @@ package com.javatechie.service.impl;
 
 import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.CartItemDto;
+import com.javatechie.dto.CategoryDto;
 import com.javatechie.dto.ItemDetailDto;
 import com.javatechie.dto.ItemDto;
 import com.javatechie.entity.*;
@@ -39,7 +40,7 @@ public class CartService implements ICartService {
     public JSONObject addItemToCart(CartItemDto cartItemDto) {
         JSONObject response = new JSONObject();
         try {
-            CartItemEntity cartItem = new CartItemEntity();
+            CartItemEntity cartItem;
             ItemDetailEntity itemDetail = itemDetailRepository.findByIdAndIsAvailableAndDeleted(cartItemDto.getItemDetail().getId(), true, 0).orElse(null);
             if(itemDetail == null) {
                 response.put("code", 0);
@@ -61,21 +62,38 @@ public class CartService implements ICartService {
                 cart.setUnixTime(System.currentTimeMillis());
                 cart = cartRepository.save(cart);
             }
-            cartItem.setItem(itemDetail);
-            cartItem.setQuantity(cartItemDto.getQuantity());
-            cartItem.setCart(cart);
+            cartItem = cartItemRepository.findByItem_IdAndOrderedAndCart_Id(itemDetail.getId(), 0, cart.getId()).orElse(null);
+            if(cartItem == null) {
+                cartItem = new CartItemEntity();
+                cartItem.setItem(itemDetail);
+                cartItem.setQuantity(cartItemDto.getQuantity());
+                cartItem.setCart(cart);
+                cartItem.setOrdered(0);
+            }
+            else {
+                cartItem.setQuantity(cartItem.getQuantity() + cartItemDto.getQuantity());
+            }
+
             cartItem = cartItemRepository.save(cartItem);
             ModelMapper mapper = MapperUtil.configModelMapper();
             mapper.map(cartItem, cartItemDto);
+            // itemDetail
             ItemDetailDto itemDetailDto = new ItemDetailDto();
             mapper.map(itemDetail, itemDetailDto);
+            // Item
             ItemEntity item = itemDetail.getItem();
+            CategoryEntity category = item.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            mapper.map(category, categoryDto);
             ItemDto itemDto = new ItemDto();
             mapper.map(item, itemDto);
             itemDetailDto.setItemDto(itemDto);
             itemDto.setItemDetails(null);
+            categoryDto.setItems(null);
+            itemDto.setCategoryDto(categoryDto);
             cartItemDto.setItemDto(itemDto);
-            cartItemDto.setPrice(itemDetail.getPrice() * cartItemDto.getQuantity());
+
+            cartItemDto.setPrice(itemDetail.getPrice() * cartItem.getQuantity());
             itemDetailDto.setItemDto(null);
             cartItemDto.setItemDetail(itemDetailDto);
             response.put("code", 1);
