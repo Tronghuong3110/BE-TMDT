@@ -161,7 +161,30 @@ public class CartService implements ICartService {
             CartItemEntity cartItem = cartItemRepository.findById(cartItemId).orElse(null);
             cartItem.setQuantity(quantity);
             cartItem = cartItemRepository.save(cartItem);
+            CartItemDto cartItemDto = new CartItemDto();
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(cartItem, cartItemDto);
+            Double price = Math.round(cartItem.getItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+            cartItemDto.setPrice(price);
 
+            ItemDto itemDto = new ItemDto();
+            ItemEntity item = cartItem.getItem().getItem();
+            mapper.map(item, itemDto);
+            itemDto.setItemDetails(null);
+            CategoryEntity category = item.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            mapper.map(category, categoryDto);
+            categoryDto.setItems(null);
+            itemDto.setCategoryDto(categoryDto);
+            cartItemDto.setItemDto(itemDto);
+
+            ItemDetailDto itemDetailDto = new ItemDetailDto();
+            BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
+            cartItemDto.setItemDetail(itemDetailDto);
+
+            response.put("code", 1);
+            response.put("message", "update item in cart success");
+            response.put("cartItem", cartItemDto);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -169,11 +192,22 @@ public class CartService implements ICartService {
             response.put("message", "Update item in cart fail!");
             response.put("cartItem", null);
         }
-        return null;
+        return response;
     }
 
     @Override
     public JSONObject deleteItemInCart(Integer cartItem) {
-        return null;
+        JSONObject response = new JSONObject();
+        try {
+            cartItemRepository.deleteById(cartItem);
+            response.put("code", 1);
+            response.put("message", "delete item in cart success");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Delete item in cart fail");
+        }
+        return response;
     }
 }

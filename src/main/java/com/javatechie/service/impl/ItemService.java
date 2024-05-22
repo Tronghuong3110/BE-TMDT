@@ -230,6 +230,11 @@ public class ItemService implements IItemService {
                 reviews.add(reviewDto);
             }
             itemDto.setReviews(reviews);
+            // lấy ra số lượng review và trung bình số sao
+            JSONObject avgRaking = reviewRepository.calculatorAvgRakingByItem(item.getId());
+            itemDto.setRating(avgRaking == null ? 0 : Double.parseDouble(avgRaking.get("rating").toString()));
+            itemDto.setNumberRating(avgRaking == null ? 0 : Integer.parseInt(avgRaking.get("number_rating").toString()));
+
             // thêm mới vào danh sách item đã xem của user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             Object object = auth.getPrincipal();
@@ -278,7 +283,8 @@ public class ItemService implements IItemService {
                 BeanUtils.copyProperties(item.getCategory(), category);
                 itemDto.setCategoryDto(category);
                 JSONObject avgRaking = reviewRepository.calculatorAvgRakingByItem(item.getId());
-                itemDto.setRaking(avgRaking == null ? 0 : Double.parseDouble(avgRaking.get("rating").toString()));
+                itemDto.setRating(avgRaking == null ? 0 : Double.parseDouble(avgRaking.get("rating").toString()));
+                itemDto.setNumberRating(avgRaking == null ? 0 : Integer.parseInt(avgRaking.get("number_rating").toString()));
                 listResponse.add(itemDto);
             }
             return listResponse;

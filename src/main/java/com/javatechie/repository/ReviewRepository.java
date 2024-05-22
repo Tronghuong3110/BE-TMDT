@@ -12,7 +12,7 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     Boolean existsByItem_IdAndUser_Id(Integer itemId, Integer userId);
 
-    @Query(value = "select avg(ranking) as rating from review where item_id = :itemId group by item_id", nativeQuery = true)
+    @Query(value = "select avg(ranking) as rating, count(*) as number_rating from review where item_id = :itemId group by item_id", nativeQuery = true)
     JSONObject calculatorAvgRakingByItem(Integer itemId);
     List<ReviewEntity> findAllByItem_Id(Integer itemId);
 }
