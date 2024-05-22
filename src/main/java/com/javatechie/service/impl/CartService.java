@@ -73,10 +73,11 @@ public class CartService implements ICartService {
             ItemDto itemDto = new ItemDto();
             mapper.map(item, itemDto);
             itemDetailDto.setItemDto(itemDto);
-//            itemDetailDto.setItemDto(itemDto);
-            cartItemDto.setItemDetail(null);
+            itemDto.setItemDetails(null);
             cartItemDto.setItemDto(itemDto);
             cartItemDto.setPrice(itemDetail.getPrice() * cartItemDto.getQuantity());
+            itemDetailDto.setItemDto(null);
+            cartItemDto.setItemDetail(itemDetailDto);
             response.put("code", 1);
             response.put("item", cartItemDto);
             response.put("message", "Add item to cart success");
