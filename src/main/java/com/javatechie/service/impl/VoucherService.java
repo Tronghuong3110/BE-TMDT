@@ -187,7 +187,7 @@ public class VoucherService implements IVoucherService {
             UserVoucherEntity oldVoucherUser = userVoucherRepository.findByUser_IdAndVoucher_Id(user.getId(), voucher.getId()).orElse(null);
             if(oldVoucherUser != null) {
                 response.put("code", 0);
-                response.put("message", "Bạn đã có voucher này trong danh sách voucher của mình!!");
+                response.put("message", "Voucher exists!!");
                 return response;
             }
             UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), false, user, voucher, null);
