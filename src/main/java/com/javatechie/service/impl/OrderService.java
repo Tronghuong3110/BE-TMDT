@@ -155,6 +155,8 @@ public class OrderService implements IOrderService {
                 itemDetail.setSoldNumber(cartItem.getQuantity());
                 itemDetailRepository.save(itemDetail);
             }
+            voucher.setUsed(true);
+            userVoucherRepository.save(voucher);
             BeanUtils.copyProperties(order, orderDto);
             response.put("code", 1);
             response.put("message", "Order success!!");

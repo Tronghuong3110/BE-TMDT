@@ -184,10 +184,13 @@ public class VoucherService implements IVoucherService {
             }
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
-            UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), user, voucher, null);
-            userVoucherEntity = userVoucherRepository.save(userVoucherEntity);
-            voucher.setNumberRemain(voucher.getNumberRemain()-1);
-            voucherRepository.save(voucher);
+            UserVoucherEntity oldVoucherUser = userVoucherRepository.findByUser_IdAndVoucher_Id(user.getId(), voucher.getId()).orElse(null);
+            if(oldVoucherUser == null) {
+                UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), false, user, voucher, null);
+                userVoucherEntity = userVoucherRepository.save(userVoucherEntity);
+                voucher.setNumberRemain(voucher.getNumberRemain()-1);
+                voucherRepository.save(voucher);
+            }
             response.put("code", 1);
             response.put("message", "Create voucher success");
         }
@@ -205,7 +208,7 @@ public class VoucherService implements IVoucherService {
         try {
             UserInfoUserDetails userInfo = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(new User());
-            List<UserVoucherEntity> listVoucherEntity = userVoucherRepository.findAllByUser_IdAndDateEnd(user.getId());
+            List<UserVoucherEntity> listVoucherEntity = userVoucherRepository.findAllByUser_IdAndDateEndAndUsed(user.getId(), false);
             List<VoucherDto> vouchers = new ArrayList<>();
             ModelMapper mapper = MapperUtil.configModelMapper();
             for(UserVoucherEntity voucher : listVoucherEntity) {
