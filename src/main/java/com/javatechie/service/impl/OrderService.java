@@ -28,8 +28,6 @@ public class OrderService implements IOrderService {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
-    private CartRepository cartRepository;
-    @Autowired
     private CartItemRepository cartItemRepository;
     @Autowired
     private PaymentRepository paymentRepository;
@@ -40,7 +38,7 @@ public class OrderService implements IOrderService {
     @Autowired
     private UserInfoRepository userInfoRepository;
     @Autowired
-    private ItemRepository itemRepository;
+    private ItemDetailRepository itemDetailRepository;
 
     // lấy ra danh sách đơn hàng đã đặt (dành cho admin)
     @Override
@@ -153,6 +151,9 @@ public class OrderService implements IOrderService {
                 cartItem.setOrder(order);
                 cartItem.setOrdered(1);
                 cartItemRepository.save(cartItem);
+                ItemDetailEntity itemDetail = cartItem.getItem();
+                itemDetail.setSoldNumber(cartItem.getQuantity());
+                itemDetailRepository.save(itemDetail);
             }
             BeanUtils.copyProperties(order, orderDto);
             response.put("code", 1);
