@@ -48,9 +48,9 @@ public class OrderController {
                                          @RequestParam("vnp_TransactionStatus") Optional<String> transactionCode,
                                          @RequestParam("shipmentId") Long shipmentId,
                                          @RequestParam("paymentId") Long paymentId,
-                                         @RequestParam("voucherId") Long voucherId) {
+                                         @RequestParam("voucherId") Optional<Long> voucherId) {
         // TH thanh toán shipcode ==> bankTranNo = shipCode
-        JSONObject response = orderService.saveOrder(orderDto, shipmentId, paymentId, voucherId, orderInfo.orElse(null), responseCode.orElse(null),
+        JSONObject response = orderService.saveOrder(orderDto, shipmentId, paymentId, voucherId.orElse(0l), orderInfo.orElse(null), responseCode.orElse(null),
                                                         transactionCode.orElse(null), bankTranNo);
         if (response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);

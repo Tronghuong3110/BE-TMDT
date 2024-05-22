@@ -114,23 +114,30 @@ public class CartService implements ICartService {
     public List<CartItemDto> findAllItemInCartByUser() {
         try {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(null);
-            CartEntity cart = cartRepository.findAllByUserId(user.getId()).orElse(null);
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            CartEntity cart = cartRepository.findAllByUserId(user.getId()).orElse(new CartEntity());
             // TH không tìm thấy user và giỏ hàng cuủa user
-            if(user == null || cart == null) {
+            if(user.getId() == null || cart.getId() == null) {
                 return null;
             }
             List<CartItemEntity> listCartItem = cartItemRepository.findAllByCart_IdAndOrdered(cart.getId(), 0);
             List<CartItemDto> listResponse = new ArrayList<>();
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();
-                BeanUtils.copyProperties(cartItem, cartItemDto);
+                ModelMapper mapper = MapperUtil.configModelMapper();
+                mapper.map(cartItem, cartItemDto);
                 Double price = Math.round(cartItem.getItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
                 cartItemDto.setPrice(price);
 
                 ItemDto itemDto = new ItemDto();
                 ItemEntity item = cartItem.getItem().getItem();
-                BeanUtils.copyProperties(item, itemDto);
+                mapper.map(item, itemDto);
+                itemDto.setItemDetails(null);
+                CategoryEntity category = item.getCategory();
+                CategoryDto categoryDto = new CategoryDto();
+                mapper.map(category, categoryDto);
+                categoryDto.setItems(null);
+                itemDto.setCategoryDto(categoryDto);
                 cartItemDto.setItemDto(itemDto);
 
                 ItemDetailDto itemDetailDto = new ItemDetailDto();
