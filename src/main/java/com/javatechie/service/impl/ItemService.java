@@ -47,6 +47,8 @@ public class ItemService implements IItemService {
     private ItemViewedRepository itemViewedRepository;
     @Autowired
     private ReviewRepository reviewRepository;
+    @Autowired
+    private CommentRepository commentRepository;
     @Override
     public JSONObject saveItem(ItemDto item, Integer categoryId, Integer brandId) {
         JSONObject response = new JSONObject();
@@ -207,6 +209,27 @@ public class ItemService implements IItemService {
             CategoryDto category = new CategoryDto();
             BeanUtils.copyProperties(item.getCategory(), category);
             itemDto.setCategoryDto(category);
+            // Lấy danh sách comment cho item
+            List<CommentEntity> listComment = commentRepository.findAllByItem_Id(item.getId());
+            List<CommentDto> comments = new ArrayList<>();
+            for(CommentEntity comment : listComment) {
+                CommentDto commentDto = new CommentDto();
+                UserDto userDto = new UserDto();
+                BeanUtils.copyProperties(comment.getUser(), userDto);
+                BeanUtils.copyProperties(comment, commentDto);
+                commentDto.setUser(userDto);
+                comments.add(commentDto);
+            }
+            itemDto.setComments(comments);
+            // Lấy danh sách review
+            List<ReviewEntity> listReview = reviewRepository.findAllByItem_Id(item.getId());
+            List<ReviewDto> reviews = new ArrayList<>();
+            for(ReviewEntity review : listReview) {
+                ReviewDto reviewDto = new ReviewDto();
+                BeanUtils.copyProperties(review, reviewDto);
+                reviews.add(reviewDto);
+            }
+            itemDto.setReviews(reviews);
             // thêm mới vào danh sách item đã xem của user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             Object object = auth.getPrincipal();

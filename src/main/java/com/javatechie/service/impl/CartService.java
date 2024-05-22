@@ -153,4 +153,27 @@ public class CartService implements ICartService {
         }
         return null;
     }
+
+    @Override
+    public JSONObject updateCart(Integer cartItemId, Integer quantity) {
+        JSONObject response = new JSONObject();
+        try {
+            CartItemEntity cartItem = cartItemRepository.findById(cartItemId).orElse(null);
+            cartItem.setQuantity(quantity);
+            cartItem = cartItemRepository.save(cartItem);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Update item in cart fail!");
+            response.put("cartItem", null);
+        }
+        return null;
+    }
+
+    @Override
+    public JSONObject deleteItemInCart(Integer cartItem) {
+        return null;
+    }
 }
