@@ -1,9 +1,6 @@
 package com.javatechie.controller;
 
-import com.javatechie.dto.PaymentDto;
 import com.javatechie.dto.ShipmentDto;
-import com.javatechie.repository.ShipmentRepository;
-import com.javatechie.service.IPaymentService;
 import com.javatechie.service.IShipmentService;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
