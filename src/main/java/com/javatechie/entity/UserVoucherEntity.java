@@ -20,6 +20,8 @@ public class UserVoucherEntity {
     private Date dateStart;
     @Column(name = "date_end")
     private Date dateEnd;
+    @Column(name = "used")
+    private Boolean used;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

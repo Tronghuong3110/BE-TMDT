@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ItemService implements IItemService {
@@ -122,7 +121,9 @@ public class ItemService implements IItemService {
             List<VariationOptionEntity> variationOptions = productItem.getVariationOptions();
             ModelMapper mapper = MapperUtil.configModelMapper();
             for(VariationOptionDto variationOptionDto : variationDto.getVariationOptions()) {
-                VariationOptionEntity variationOption = variationOptions.stream().filter(variationOptionEnity -> variationOptionEnity.getId().equals(variationOptionDto.getId())).toList().get(0);
+                List<VariationOptionEntity> variationOptionEntities = variationOptions.stream().filter(variationOptionEntity -> variationOptionEntity.getId().equals(variationOptionDto.getId())).toList();
+                if(variationOptionEntities.size() <= 0) continue;
+                VariationOptionEntity variationOption = variationOptionEntities.get(0);
                 mapper.map(variationOptionDto, variationOption);
                 variationOptionRepository.save(variationOption);
             }
@@ -171,6 +172,8 @@ public class ItemService implements IItemService {
             productDto.setImages(imageDtos);
             productDto.setProductItems(null);
             productDto.getCategory().setVariations(null);
+            productDto.setComments(null);
+            productDto.setReviews(null);
             response.put("code", 1);
             response.put("message", "Cập nhật thông tin sản phẩm thành công !!");
             response.put("item", productDto);
@@ -190,7 +193,7 @@ public class ItemService implements IItemService {
         JSONObject response = new JSONObject();
         try {
 //            ProductItemEntity productItem = new ProductItemEntity();
-            ProductEntity product = productRepository.findById(productId).orElse(null);
+            ProductEntity product = productRepository.findByIdAndDeleted(productId, false).orElse(null);
             if(product == null) {
                 response.put("message", "Sản phẩm không tồn tại");
                 response.put("code", 0);
@@ -223,6 +226,8 @@ public class ItemService implements IItemService {
             for(CommentEntity comment : commentEntities) {
                 CommentDto commentDto = new CommentDto();
                 mapper.map(comment, commentDto);
+                commentDto.getUser().setName(comment.getUser().getName());
+                commentDto.getUser().setAvatarPath(comment.getUser().getAvatarPath());
                 comments.add(commentDto);
             }
             response.put("comments", !isFindAll ? comments : null);
@@ -232,10 +237,12 @@ public class ItemService implements IItemService {
             List<ProductItemEntity> productItems = productItemRepository.findAllByProduct_Id(productId);
             List<JSONObject> itemDetails = new ArrayList<>();
             for(ProductItemEntity productItem : productItems) {
-                   JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
-                   object.put("quantity_stock", productItem.getQuantityInStock());
-                   object.put("quantity_sold", productItem.getQuantitySold());
-                   itemDetails.add((JSONObject) parser.parse(object.get("item_detail").toString()));
+                    JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
+                    JSONObject productDetail = (JSONObject) parser.parse(object.get("item_detail").toString());
+                    productDetail.put("quantity_stock", productItem.getQuantityInStock());
+                    productDetail.put("quantity_sold", productItem.getQuantitySold());
+                    productDetail.put("productItem", productItem.getId());
+                    itemDetails.add(productDetail);
             }
             response.put("itemDetails", itemDetails);
 
@@ -274,5 +281,23 @@ public class ItemService implements IItemService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public JSONObject deleteProduct(Long productId) {
+        JSONObject response = new JSONObject();
+        try {
+            ProductEntity product = productRepository.findById(productId).orElse(new ProductEntity());
+            product.setDeleted(true);
+            productRepository.save(product);
+            response.put("code", 1);
+            response.put("message", "Xóa sản phầm thành công !!");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Xóa sản phẩm thất bại !!");
+        }
+        return response;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
@@ -17,4 +18,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     List<ProductEntity> findAllProduct(@Param("categoryId") Integer categoryId,
                                        @Param("brandId") Integer brandId,
                                        @Param("key") String key);
+
+    Optional<ProductEntity> findByIdAndDeleted(Long id, boolean deleted);
 }

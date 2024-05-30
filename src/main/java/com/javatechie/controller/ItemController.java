@@ -64,8 +64,8 @@ public class ItemController {
 
     @DeleteMapping("/admin/api/item")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> deleteItem(@RequestParam("id")Integer id) {
-        JSONObject response = new JSONObject();
+    public ResponseEntity<?> deleteItem(@RequestParam("id")Long productId) {
+        JSONObject response = itemService.deleteProduct(productId);
         if(response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);
         }

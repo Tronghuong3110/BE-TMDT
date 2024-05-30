@@ -18,4 +18,5 @@ public class VoucherDto {
     private Date startDate;
     private Date endDate;
     private Integer numberRemain;
+    private Long userVoucherId;
 }

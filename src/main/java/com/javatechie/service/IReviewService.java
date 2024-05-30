@@ -8,11 +8,11 @@ import java.util.List;
 
 public interface IReviewService {
 
-    JSONObject saveReview(ReviewDto reviewDto, Integer itemId);
-    JSONObject saveComment(CommentDto commentDto, Integer itemId);
+    JSONObject saveReview(ReviewDto reviewDto, Long productId);
+    JSONObject saveComment(CommentDto commentDto, Long productId);
     JSONObject updateComment(CommentDto commentDto);
     ReviewDto findOne(Long id); // đang phân vân có dùng đến không
     CommentDto findOneComment(Long id); // đang phân vân có dùng đến không
-    List<CommentDto> findAllComment(Integer itemId);
+    List<CommentDto> findAllComment(Long productId);
     JSONObject deleteComment(Long id);
 }

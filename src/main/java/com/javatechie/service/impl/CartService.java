@@ -2,16 +2,22 @@ package com.javatechie.service.impl;
 
 import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.CartItemDto;
+import com.javatechie.dto.ImageDto;
+import com.javatechie.dto.ProductDto;
+import com.javatechie.dto.ProductItemDto;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.ICartService;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +30,10 @@ public class CartService implements ICartService {
     private UserInfoRepository userInfoRepository;
     @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private ProductItemRepository productItemRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     // Thêm sản phẩm vào giỏ hàng
     @Override
@@ -31,17 +41,18 @@ public class CartService implements ICartService {
         JSONObject response = new JSONObject();
         try {
             CartItemEntity cartItem = new CartItemEntity();
+            ProductItemEntity productItem = productItemRepository.findById(cartItemDto.getProductItemId()).orElse(null);
 //            ItemDetailEntity itemDetail = itemDetailRepository.findByIdAndIsAvailableAndDeleted(cartItemDto.getItemDetail().getId(), true, 0).orElse(null);
-//            if(itemDetail == null) {
+            if(productItem == null) {
                 response.put("code", 0);
-//                response.put("message", "Can not found itemDetail by id = " + cartItemDto.getItemDetail().getId());
-//                return response;
-//            }
+                response.put("message", "Sản phẩm không tồn tại !!");
+                return response;
+            }
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(null);
             if(user == null) {
                 response.put("code", 0);
-                response.put("message", "User can not found");
+                response.put("message", "Bạn chưa đăng nhập !!");
                 return response;
             }
             CartEntity cart = cartRepository.findByUserAndOrdered(user.getId()).orElse(null);
@@ -52,13 +63,14 @@ public class CartService implements ICartService {
                 cart.setUnixTime(System.currentTimeMillis());
                 cart = cartRepository.save(cart);
             }
-//            cartItem.setItem(itemDetail);
+            cartItem.setProductItem(productItem);
             cartItem.setQuantity(cartItemDto.getQuantity());
             cartItem.setCart(cart);
             cartItem = cartItemRepository.save(cartItem);
+            BeanUtils.copyProperties(cartItem, cartItemDto);
             response.put("code", 1);
-            response.put("message", "Add item to cart success");
-//            response.put("cartItem", cartItem);
+            response.put("message", "Thêm vào giỏ hàng thành công !!");
+            response.put("cartItem", cartItemDto);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -72,10 +84,10 @@ public class CartService implements ICartService {
     public List<CartItemDto> findAllItemInCartByUser() {
         try {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(null);
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
             CartEntity cart = cartRepository.findAllByUserId(user.getId()).orElse(null);
             // TH không tìm thấy user và giỏ hàng cuủa user
-            if(user == null || cart == null) {
+            if(user.getId() == null || cart == null) {
                 return null;
             }
             List<CartItemEntity> listCartItem = cartItemRepository.findAllByCart_IdAndOrdered(cart.getId(), 0);
@@ -83,17 +95,24 @@ public class CartService implements ICartService {
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();
                 BeanUtils.copyProperties(cartItem, cartItemDto);
-//                Double price = Math.round(cartItem.getItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
-//                cartItemDto.setPrice(price);
+                Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+                cartItemDto.setPrice(price);
 
-//                ItemDto itemDto = new ItemDto();
-//                ItemEntity item = cartItem.getItem().getItem();
-//                BeanUtils.copyProperties(item, itemDto);
-//                cartItemDto.setItemDto(itemDto);
-//
-//                ItemDetailDto itemDetailDto = new ItemDetailDto();
-//                BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
-//                cartItemDto.setItemDetail(itemDetailDto);
+                ProductEntity product = productRepository.findById(cartItem.getProductItem().getProduct().getId()).orElse(new ProductEntity());
+                // Lấy ra danh sách ảnh
+                List<ImageEntity> images = product.getImages();
+                List<ImageDto> imageDtos = new ArrayList<>();
+                ModelMapper mapper = MapperUtil.configModelMapper();
+                for(ImageEntity image : images) {
+                    ImageDto imageDto = new ImageDto();
+                    mapper.map(image, imageDto);
+                    imageDtos.add(imageDto);
+                }
+                cartItemDto.setProductItemId(product.getId());
+                cartItemDto.setImages(imageDtos);
+
+                ProductItemDto productItemDto = new ProductItemDto();
+                BeanUtils.copyProperties(cartItem.getProductItem(), productItemDto);
 
                 listResponse.add(cartItemDto);
             }

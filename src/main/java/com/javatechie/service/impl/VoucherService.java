@@ -9,10 +9,13 @@ import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.repository.UserVoucherRepository;
 import com.javatechie.repository.VoucherRepository;
 import com.javatechie.service.IVoucherService;
+import com.javatechie.util.MapperUtil;
 import org.aspectj.weaver.ast.Literal;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.server.Jsp;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -67,10 +70,10 @@ public class VoucherService implements IVoucherService {
     }
 
     @Override
-    public List<VoucherDto> findAll() {
+    public List<VoucherDto> findAll(Date date) {
         try {
-            System.out.println(new Date(System.currentTimeMillis()));
-            List<VoucherEntity> listVouchers = voucherRepository.findById(null, new Date(System.currentTimeMillis()));
+//            System.out.println(new Date(System.currentTimeMillis()));
+            List<VoucherEntity> listVouchers = voucherRepository.findById(null, date);
             List<VoucherDto> listResponse = new ArrayList<>();
             for(VoucherEntity voucher : listVouchers) {
                 VoucherDto voucherDto = new VoucherDto();
@@ -181,7 +184,13 @@ public class VoucherService implements IVoucherService {
             }
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
-            UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), user, voucher, null);
+            UserVoucherEntity oldVoucherUser = userVoucherRepository.findByUser_IdAndVoucher_Id(user.getId(), voucher.getId()).orElse(null);
+            if(oldVoucherUser != null) {
+                response.put("code", 0);
+                response.put("message", "Voucher exists!!");
+                return response;
+            }
+            UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), false, user, voucher, null);
             userVoucherEntity = userVoucherRepository.save(userVoucherEntity);
             voucher.setNumberRemain(voucher.getNumberRemain()-1);
             voucherRepository.save(voucher);
@@ -194,6 +203,31 @@ public class VoucherService implements IVoucherService {
             response.put("message", "Create voucher fail");
         }
         return response;
+    }
+
+    @Override
+    public List<VoucherDto> findAllVoucherOfUser() {
+//        JSONObject response = new JSONObject();
+        try {
+            UserInfoUserDetails userInfo = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userInfo.getUsername(), 0).orElse(new User());
+            List<UserVoucherEntity> listVoucherEntity = userVoucherRepository.findAllByUser_IdAndDateEndAndUsed(user.getId(), false);
+            List<VoucherDto> vouchers = new ArrayList<>();
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            for(UserVoucherEntity voucher : listVoucherEntity) {
+                VoucherEntity voucherEntity = voucher.getVoucher();
+                VoucherDto voucherDto = new VoucherDto();
+                mapper.map(voucherEntity, voucherDto);
+                voucherDto.setIdItems(null);
+                voucherDto.setUserVoucherId(voucher.getId());
+                vouchers.add(voucherDto);
+            }
+            return vouchers;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private VoucherEntity convertToEntity(VoucherEntity voucher, VoucherDto voucherDto) {
