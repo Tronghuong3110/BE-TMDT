@@ -16,11 +16,16 @@ public class VariationOptionEntity {
     @Id
     private Long id;
     private String value;
+    private Long unixTime;
 
-    @ManyToMany(mappedBy = "variationOptions")
+
+    @ManyToMany
+    @JoinTable(name = "product_variation",
+            joinColumns = @JoinColumn(name = "variation_option_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_item_id"))
     private List<ProductItemEntity> productItems;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variation_id")
     private VariationEntity variation;
 }

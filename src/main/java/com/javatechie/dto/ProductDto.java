@@ -8,6 +8,7 @@ import java.util.List;
 public class ProductDto {
     private Long id;
     private String name;
+    private Long productItemId;
     private List<ProductItemDto> productItems;
     private CategoryDto category;
     private List<ImageDto> images;

@@ -1,14 +1,19 @@
 package com.javatechie.controller;
 
 import com.javatechie.dto.CategoryDto;
+import com.javatechie.dto.ProductDto;
 import com.javatechie.dto.RequestItemDto;
+import com.javatechie.dto.RequestUpdate;
 import com.javatechie.service.IItemService;
+import com.javatechie.service.IVariationService;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
@@ -16,39 +21,41 @@ import java.util.Optional;
 public class ItemController {
     @Autowired
     private IItemService itemService;
+    @Autowired
+    private IVariationService variationService;
 
     @PostMapping("/admin/api/item")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')") // ok
     public ResponseEntity<?> saveItem(@RequestBody RequestItemDto requestItemDto) {
         JSONObject response = itemService.saveProduct(requestItemDto.getProduct(), requestItemDto.getCategory());
-//        if(response.get("code").equals(0)) {
-//            return ResponseEntity.badRequest().body(response);
-//        }
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/customer/api/item") // lấy ra thông tin chi tiết 1 sản phẩm (chưa đăng nhập cũng có thể xem)
-    public ResponseEntity<?> findOne(@RequestParam("id") Integer id) {
-//        ItemDto itemDto = itemService.findOneById(id);
-//        if(itemDto == null) {
-//            return ResponseEntity.status(500).body("Can not found");
-//        }
-        return ResponseEntity.ok(null);
+    @GetMapping("/customer/api/item") // ok
+    public ResponseEntity<?> findOne(@RequestParam("productId") Long productId) {
+        JSONObject response = itemService.findOneById(productId, false);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.status(500).body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/customer/api/items") // lấy ra tất cả sản phẩm (chưa đăng nhập cũng có thể xem)
+    @GetMapping("/customer/api/items") // ok
     public ResponseEntity<?> findAllItem(@RequestParam("categoryId") Optional<Integer> categoryId, @RequestParam("brandId") Optional<Integer> brandId, @RequestParam("key")Optional<String> key) {
-//        List<ItemDto> listResponse = itemService.findAllItem(categoryId.orElse(null), brandId.orElse(null), key.orElse(null));
-//        if(listResponse == null) {
-//            return ResponseEntity.badRequest().body("Can not found item!!");
-//        }
-        return ResponseEntity.ok(null);
+        JSONArray listResponse = itemService.findAll(categoryId.orElse(null), brandId.orElse(null), key.orElse(null));
+        if(listResponse == null) {
+            return ResponseEntity.badRequest().body(new ArrayList<>());
+        }
+        return ResponseEntity.ok(listResponse);
     }
 
     @PutMapping("/admin/api/item")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<?> updateItem(@RequestParam("categoryId")Integer categoryId, @RequestParam("brandId")Integer brandId) {
-        JSONObject response = new JSONObject();
+    @PreAuthorize("hasAuthority('ADMIN')") // ok
+    public ResponseEntity<?> updateItem(@RequestBody RequestUpdate request, @RequestParam("categoryId")Integer categoryId, @RequestParam("brandId")Integer brandId) {
+        JSONObject response = itemService.updateProduct(request.getProduct(), request.getVariation(), categoryId, brandId);
         if(response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);
         }
@@ -65,5 +72,13 @@ public class ItemController {
         return ResponseEntity.ok(response);
     }
 
-
+    @PostMapping("/admin/api/item/detail") // ok
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> saveItemDetail(@RequestBody CategoryDto categoryDto, @RequestParam("productId") Long productId) {
+        JSONObject response = variationService.saveVariationOption(categoryDto, productId);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 }

@@ -8,5 +8,6 @@ import java.util.List;
 public class VariationDto {
     private Long id;
     private String name;
+    private String variationOptionValue;
     private List<VariationOptionDto> variationOptions;
 }

@@ -1,5 +1,6 @@
 package com.javatechie.service;
 
+import com.javatechie.dto.CategoryDto;
 import com.javatechie.dto.VariationDto;
 import org.json.simple.JSONObject;
 
@@ -10,4 +11,6 @@ public interface IVariationService {
     JSONObject updateVariation(VariationDto variationDto, int categoryId);
     List<VariationDto> findAllByCategory(int categoryId);
     VariationDto findOneVariation(int id);
+    JSONObject deleteVariation(Long id);
+    JSONObject saveVariationOption(CategoryDto categoryDto, Long productId);
 }

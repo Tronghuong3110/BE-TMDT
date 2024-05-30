@@ -16,16 +16,15 @@ public class ProductItemEntity {
 
     @Id
     private Long id;
-    private String sku;
+    private Integer quantityInStock;
+    private Integer quantitySold;
+    private Float price;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 
-    @ManyToMany
-    @JoinTable(name = "product_variation",
-    joinColumns = @JoinColumn(name = "product_item_id"),
-    inverseJoinColumns = @JoinColumn(name = "variation_option_id"))
+    @ManyToMany(mappedBy = "productItems", fetch = FetchType.LAZY)
     private List<VariationOptionEntity> variationOptions;
 
     @ManyToMany

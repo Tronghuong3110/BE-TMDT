@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Data
 public class UserInfoUserDetails implements UserDetails {
     private String username;
+    private String name;
     private String password;
     private String roles;
     private List<GrantedAuthority> authorities;
@@ -28,6 +29,7 @@ public class UserInfoUserDetails implements UserDetails {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
         this.roles = user.getRoles();
+        this.name = user.getName();
     }
 
     @Override
