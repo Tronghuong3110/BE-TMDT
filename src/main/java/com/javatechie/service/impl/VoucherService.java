@@ -219,6 +219,7 @@ public class VoucherService implements IVoucherService {
                 VoucherDto voucherDto = new VoucherDto();
                 mapper.map(voucherEntity, voucherDto);
                 voucherDto.setIdItems(null);
+                voucherDto.setUserVoucherId(voucher.getId());
                 vouchers.add(voucherDto);
             }
             return vouchers;
