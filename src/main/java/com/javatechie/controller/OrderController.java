@@ -31,7 +31,7 @@ public class OrderController {
     }
 
     // THANH TOÁN ONLINE
-    @GetMapping("/payment/online")
+    @PostMapping("/payment/online")
     public ResponseEntity<?> createPayment(@RequestBody OrderDto orderDto) {
         JSONObject response = orderService.paymentOnline(orderDto);
         if(response.get("code").equals(0)) {

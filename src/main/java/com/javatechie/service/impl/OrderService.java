@@ -155,6 +155,11 @@ public class OrderService implements IOrderService {
                 itemDetail.setSoldNumber(cartItem.getQuantity());
                 itemDetailRepository.save(itemDetail);
             }
+            if(voucher == null) {
+                response.put("code", 0);
+                response.put("message", "Hệ thống không tìm thấy khuyến mại của bạn !!");
+                return response;
+            }
             voucher.setUsed(true);
             userVoucherRepository.save(voucher);
             BeanUtils.copyProperties(order, orderDto);
