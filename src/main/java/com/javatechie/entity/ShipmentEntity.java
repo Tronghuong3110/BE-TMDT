@@ -3,6 +3,8 @@ package com.javatechie.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Table(name = "shipment")
 @Data
 @Entity
@@ -20,6 +22,6 @@ public class ShipmentEntity {
     private String shippingUnit; // đơn vị vận chuyển
     private String code;
 
-    @OneToOne(mappedBy = "shipment")
-    private OrderEntity order;
+    @OneToMany(mappedBy = "shipment")
+    private List<OrderEntity> order;
 }
