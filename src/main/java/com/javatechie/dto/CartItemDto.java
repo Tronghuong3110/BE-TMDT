@@ -1,6 +1,7 @@
 package com.javatechie.dto;
 
 import lombok.Data;
+import org.json.simple.JSONArray;
 
 import java.util.List;
 
@@ -12,4 +13,5 @@ public class CartItemDto {
     private Long productItemId;
     private Long productId;
     private List<ImageDto> images;
+    private JSONArray productItemDetail;
 }

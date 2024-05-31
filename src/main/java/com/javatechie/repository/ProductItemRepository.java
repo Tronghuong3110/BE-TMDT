@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface ProductItemRepository extends JpaRepository<ProductItemEntity, Long> {
-    @Query(value = "SELECT json_objectagg(variation.name, json_object('id', variation_option.id, 'value', variation_option.value)) AS item_detail\n" +
+    @Query(value = "SELECT json_arrayagg(json_object('id_variation_option', variation_option.id, 'value', variation_option.value, 'name', variation.name)) AS item_detail \n" +
                     "FROM variation_option " +
                     "JOIN product_variation ON variation_option.id = product_variation.variation_option_id " +
                     "JOIN variation ON variation.id = variation_option.variation_id " +

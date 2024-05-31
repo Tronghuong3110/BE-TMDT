@@ -1,15 +1,14 @@
 package com.javatechie.service.impl;
 
 import com.javatechie.config.UserInfoUserDetails;
-import com.javatechie.dto.CartItemDto;
-import com.javatechie.dto.ImageDto;
-import com.javatechie.dto.ProductDto;
-import com.javatechie.dto.ProductItemDto;
+import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.ICartService;
 import com.javatechie.util.MapperUtil;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class CartService implements ICartService {
     private ProductRepository productRepository;
 
     // Thêm sản phẩm vào giỏ hàng
-    @Override
+    @Override // test thanh cong
     public JSONObject addItemToCart(CartItemDto cartItemDto) {
         JSONObject response = new JSONObject();
         try {
@@ -63,11 +62,43 @@ public class CartService implements ICartService {
                 cart.setUnixTime(System.currentTimeMillis());
                 cart = cartRepository.save(cart);
             }
-            cartItem.setProductItem(productItem);
-            cartItem.setQuantity(cartItemDto.getQuantity());
-            cartItem.setCart(cart);
+            cartItem = cartItemRepository.findByProductItem_IdAndOrderedAndCart_Id(productItem.getId(), 0, cart.getId()).orElse(null);
+            if(cartItem == null) {
+                cartItem = new CartItemEntity();
+                cartItem.setProductItem(productItem);
+                cartItem.setQuantity(cartItemDto.getQuantity());
+                cartItem.setCart(cart);
+                cartItem.setOrdered(0);
+            }
+            else {
+                cartItem.setQuantity(cartItem.getQuantity() + cartItemDto.getQuantity());
+            }
             cartItem = cartItemRepository.save(cartItem);
-            BeanUtils.copyProperties(cartItem, cartItemDto);
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(cartItem, cartItemDto);
+            // Set giá
+            Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+            cartItemDto.setPrice(price);
+            ProductEntity product = productRepository.findById(cartItem.getProductItem().getProduct().getId()).orElse(new ProductEntity());
+            // Lấy ra danh sách ảnh
+            List<ImageEntity> images = product.getImages();
+            List<ImageDto> imageDtos = new ArrayList<>();
+            for(ImageEntity image : images) {
+                ImageDto imageDto = new ImageDto();
+                mapper.map(image, imageDto);
+                imageDtos.add(imageDto);
+            }
+            cartItemDto.setProductId(product.getId());
+            cartItemDto.setImages(imageDtos);
+            JSONParser parser = new JSONParser();
+            JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
+            JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+            JSONObject quantity = new JSONObject();
+            quantity.put("quantity_stock", productItem.getQuantityInStock());
+            quantity.put("quantity_sold", productItem.getQuantitySold());
+            quantity.put("productItem", productItem.getId());
+            productDetail.add(quantity);
+            cartItemDto.setProductItemDetail(productDetail);
             response.put("code", 1);
             response.put("message", "Thêm vào giỏ hàng thành công !!");
             response.put("cartItem", cartItemDto);
@@ -80,7 +111,7 @@ public class CartService implements ICartService {
         return response;
     }
 
-    @Override
+    @Override // test thành công
     public List<CartItemDto> findAllItemInCartByUser() {
         try {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -97,7 +128,6 @@ public class CartService implements ICartService {
                 BeanUtils.copyProperties(cartItem, cartItemDto);
                 Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
                 cartItemDto.setPrice(price);
-
                 ProductEntity product = productRepository.findById(cartItem.getProductItem().getProduct().getId()).orElse(new ProductEntity());
                 // Lấy ra danh sách ảnh
                 List<ImageEntity> images = product.getImages();
@@ -108,12 +138,17 @@ public class CartService implements ICartService {
                     mapper.map(image, imageDto);
                     imageDtos.add(imageDto);
                 }
-                cartItemDto.setProductItemId(product.getId());
+                cartItemDto.setProductId(product.getId());
                 cartItemDto.setImages(imageDtos);
-
-                ProductItemDto productItemDto = new ProductItemDto();
-                BeanUtils.copyProperties(cartItem.getProductItem(), productItemDto);
-
+                JSONParser parser = new JSONParser();
+                JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(cartItem.getProductItem().getId());
+                JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                JSONObject quantity = new JSONObject();
+                quantity.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
+                quantity.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
+                quantity.put("productItem", cartItem.getProductItem().getId());
+                productDetail.add(quantity);
+                cartItemDto.setProductItemDetail(productDetail);
                 listResponse.add(cartItemDto);
             }
             return listResponse;

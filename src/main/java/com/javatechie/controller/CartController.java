@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/customer/api")
 public class CartController {
 
     @Autowired
@@ -22,7 +21,7 @@ public class CartController {
         return "Hello";
     }
 
-    @PostMapping("/cart")
+    @PostMapping("/customer/api/cart")
     public ResponseEntity<?> addItemToCart(@RequestBody CartItemDto cartItemDto) {
         JSONObject response = cartService.addItemToCart(cartItemDto);
         if(response.get("code").equals(0)) {
@@ -31,7 +30,7 @@ public class CartController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/carts")
+    @GetMapping("api/carts")
     public ResponseEntity<?> findAllCartItemInCart() {
         List<CartItemDto> listCartItem = cartService.findAllItemInCartByUser();
         if(listCartItem == null) {

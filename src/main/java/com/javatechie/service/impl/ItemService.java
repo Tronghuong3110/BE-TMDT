@@ -188,7 +188,7 @@ public class ItemService implements IItemService {
         return response;
     }
 
-    @Override
+    @Override // test thành công
     public JSONObject findOneById(Long productId, boolean isFindAll) {
         JSONObject response = new JSONObject();
         try {
@@ -226,8 +226,9 @@ public class ItemService implements IItemService {
             for(CommentEntity comment : commentEntities) {
                 CommentDto commentDto = new CommentDto();
                 mapper.map(comment, commentDto);
-                commentDto.getUser().setName(comment.getUser().getName());
-                commentDto.getUser().setAvatarPath(comment.getUser().getAvatarPath());
+                commentDto.setFullName(comment.getUser().getName());
+                commentDto.setAvatarPath(comment.getUser().getAvatarPath());
+                commentDto.setUser(null);
                 comments.add(commentDto);
             }
             response.put("comments", !isFindAll ? comments : null);
@@ -235,13 +236,15 @@ public class ItemService implements IItemService {
             // Lấy danh sách itemDetail (Là danh sách productItem)
             JSONParser parser = new JSONParser();
             List<ProductItemEntity> productItems = productItemRepository.findAllByProduct_Id(productId);
-            List<JSONObject> itemDetails = new ArrayList<>();
+            List<JSONArray> itemDetails = new ArrayList<>();
             for(ProductItemEntity productItem : productItems) {
                     JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
-                    JSONObject productDetail = (JSONObject) parser.parse(object.get("item_detail").toString());
-                    productDetail.put("quantity_stock", productItem.getQuantityInStock());
-                    productDetail.put("quantity_sold", productItem.getQuantitySold());
-                    productDetail.put("productItem", productItem.getId());
+                    JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                    JSONObject quantity = new JSONObject();
+                    quantity.put("quantity_stock", productItem.getQuantityInStock());
+                    quantity.put("quantity_sold", productItem.getQuantitySold());
+                    quantity.put("productItem", productItem.getId());
+                    productDetail.add(quantity);
                     itemDetails.add(productDetail);
             }
             response.put("itemDetails", itemDetails);

@@ -17,6 +17,7 @@ public class VariationEntity {
     @Id
     private Long id;
     private String name;
+    private String nameVie;
 
     @OneToMany(mappedBy = "variation", fetch = FetchType.LAZY)
     private List<VariationOptionEntity> variationOptions;

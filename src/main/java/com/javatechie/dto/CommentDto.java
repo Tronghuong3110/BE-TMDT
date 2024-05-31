@@ -12,4 +12,6 @@ public class CommentDto {
     private Date modifiledDate;
     private String content;
     private UserDto user;
+    private String fullName;
+    private String avatarPath;
 }
