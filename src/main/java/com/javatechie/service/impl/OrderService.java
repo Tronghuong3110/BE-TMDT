@@ -6,7 +6,9 @@ import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IOrderService;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +28,6 @@ public class OrderService implements IOrderService {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
-    private CartRepository cartRepository;
-    @Autowired
     private CartItemRepository cartItemRepository;
     @Autowired
     private PaymentRepository paymentRepository;
@@ -37,8 +37,10 @@ public class OrderService implements IOrderService {
     private UserVoucherRepository userVoucherRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
+    @Autowired
+    private ProductItemRepository productItemRepository;
 
-    // lấy ra danh sách đơn hàng đã đặt (dành cho admin)
+    // lấy ra danh sách đơn hàng đã đặt (dành cho người dùng và admin)
     @Override
     public List<OrderDto> findAllOrder() {
         try {
@@ -79,29 +81,34 @@ public class OrderService implements IOrderService {
     @Override
     public List<CartItemDto> getListItemOfOrder(Long orderId) {
         try {
-            OrderEntity order = orderRepository.findById(orderId).orElse(null);
+//            OrderEntity order = orderRepository.findById(orderId).orElse(new OrderEntity());
 //            List<CartItemEntity> listCartItem = order.getCartItems();
-//            List<CartItemDto> listResponse = new ArrayList<>();
+            List<CartItemDto> listResponse = new ArrayList<>();
 //            for(CartItemEntity cartItem : listCartItem) {
 //                CartItemDto cartItemDto = new CartItemDto();
-//                BeanUtils.copyProperties(cartItem, cartItemDto);
-//                // xét itemDetail
-//                ItemDetailEntity itemDetail = cartItem.getItem();
+//                ModelMapper mapper = MapperUtil.configModelMapper();
+//                mapper.map(cartItem, cartItemDto);
+//                Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+//                cartItemDto.setPrice(price);
+//
+//                ProductItemDto itemDto = new ProductItemDto();
+//                ProductEntity item = cartItem.getProductItem().getProduct();
+//                mapper.map(item, itemDto);
+//                itemDto.set(null);
+//                CategoryEntity category = item.getCategory();
+//                CategoryDto categoryDto = new CategoryDto();
+//                mapper.map(category, categoryDto);
+//                categoryDto.setItems(null);
+//                itemDto.setCategoryDto(categoryDto);
+//                cartItemDto.setItemDto(itemDto);
+//
 //                ItemDetailDto itemDetailDto = new ItemDetailDto();
-//                BeanUtils.copyProperties(itemDetail, itemDetailDto);
-//                // xet item
-//                ItemEntity item = itemDetail.getItem();
-//                ItemDto itemDto = new ItemDto();
-//                BeanUtils.copyProperties(item, itemDto);
-//
-//                itemDetailDto.setItemDto(itemDto);
-//
-//                double totalPrice = cartItem.getQuantity() * itemDetail.getPrice();
-//                cartItemDto.setPrice(totalPrice);
+//                BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
 //                cartItemDto.setItemDetail(itemDetailDto);
+//
 //                listResponse.add(cartItemDto);
+                return listResponse;
 //            }
-//            return listResponse;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -119,6 +126,7 @@ public class OrderService implements IOrderService {
             PaymentEntity payment = paymentRepository.findById(paymentMethod).orElse(new PaymentEntity());
             String statusPayment;
             Date datePayment = null;
+            System.out.println("Code: " + payment.getCode());
             if(payment.getCode().equals("cash")) {
                 statusPayment = "Chưa thanh toán";
             }
@@ -129,7 +137,7 @@ public class OrderService implements IOrderService {
             // lấy ra method vận chuyển
             ShipmentEntity shipment = shipmentRepository.findById(shipmentMethod).orElse(new ShipmentEntity());
             // lấy ra voucher của user
-            UserVoucherEntity voucher = userVoucherRepository.findById(voucherId).orElse(new UserVoucherEntity());
+            UserVoucherEntity voucher = userVoucherRepository.findById(voucherId).orElse(null);
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
 
@@ -143,16 +151,23 @@ public class OrderService implements IOrderService {
                 cartItem.setOrder(order);
                 cartItem.setOrdered(1);
                 cartItemRepository.save(cartItem);
+                ProductItemEntity itemDetail = cartItem.getProductItem();
+                itemDetail.setQuantitySold(cartItem.getQuantity());
+                productItemRepository.save(itemDetail);
+            }
+            if(voucher != null) {
+                voucher.setUsed(true);
+                userVoucherRepository.save(voucher);
             }
             BeanUtils.copyProperties(order, orderDto);
             response.put("code", 1);
-            response.put("message", "Order success!!");
+            response.put("message", "Đặt hàng thành công !!");
             response.put("order", orderDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Order fail!!");
+            response.put("message", "Đặt hàng thất bại !!");
             response.put("order", new OrderDto());
         }
         return response;
@@ -202,15 +217,15 @@ public class OrderService implements IOrderService {
             while (itr.hasNext()) {
                 String fieldName = (String) itr.next();
                 String fieldValue = (String) vnp_Params.get(fieldName);
-                if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                if ((fieldValue != null) && (!fieldValue.isEmpty())) {
                     //Build hash data
                     hashData.append(fieldName);
                     hashData.append('=');
-                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
                     //Build query
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
                     query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
                     if (itr.hasNext()) {
                         query.append('&');
                         hashData.append('&');
