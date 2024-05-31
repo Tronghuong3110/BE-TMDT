@@ -40,7 +40,7 @@ public class OrderService implements IOrderService {
     @Autowired
     private ItemDetailRepository itemDetailRepository;
 
-    // lấy ra danh sách đơn hàng đã đặt (dành cho admin)
+    // lấy ra danh sách đơn hàng đã đặt (danh cho admin và user)
     @Override
     public List<OrderDto> findAllOrder() {
         try {
@@ -245,5 +245,16 @@ public class OrderService implements IOrderService {
             response.put("url", "");
         }
         return response;
+    }
+
+    @Override
+    public List<OrderDto> findAllOrderByUser() {
+        try {
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
