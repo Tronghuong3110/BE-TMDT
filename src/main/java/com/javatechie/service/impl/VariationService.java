@@ -129,7 +129,6 @@ public class VariationService implements IVariationService {
         try {
             // mỗi bộ list<Variation> đại diện cho 1 sản phẩm chi tiết của sản phẩm
             JSONObject productDetail = new JSONObject();
-//            ProductItemEntity productItem = productItemRepository.findById(productItemId).orElse(new ProductItemEntity());
             ProductEntity product = productRepository.findById(productId).orElse(new ProductEntity());
             // Tạo mới 1 sản phẩm chi tiết của 1 sản phẩm ==> set số lượng đã bán, số lượng trong kho, giá = 0
             ProductItemEntity productItem = new ProductItemEntity();
@@ -142,20 +141,26 @@ public class VariationService implements IVariationService {
 
             List<ProductItemEntity> productItems = new ArrayList<>();
             productItems.add(productItem);
-            long unixTime = System.currentTimeMillis();
-            for(VariationEntity variation : productItem.getProduct().getCategory().getVariations()) {
-                // TH thuộc tính này của sản phẩm có nhiều giá trị
+            for(VariationEntity variation : productItem.getProduct().getCategory().getVariations()) { // duyệt toàn bộ variation theo category của sản phầm
+                long unixTime = System.currentTimeMillis();
+                // kiểm tra xem variation đang xét có được chỉnh sửa hay không
                 List<VariationDto> variationDtos = categoryDto.getVariations().stream().filter(variationTmp -> variationTmp.getId().equals(variation.getId())).toList();
                 VariationOptionEntity variationOptionTmp = new VariationOptionEntity();
                 variationOptionTmp.setVariation(variation);
                 variationOptionTmp.setProductItems(productItems);
                 variationOptionTmp.setUnixTime(unixTime);
                 variationOptionTmp.setId(System.currentTimeMillis());
-                if(!variationDtos.isEmpty()) {
+                if(!variationDtos.isEmpty()) { // variation này không phải là thuộc tính chung
                     variationOptionTmp.setValue(variationDtos.get(0).getVariationOptionValue());
                 }
-                else {
-                    variationOptionTmp.setValue(variation.getVariationOptions().get(0).getValue());
+                else { // variation đang xét là thuộc tính chung của sản phẩm đang thực hiện thay đổi
+                    List<Long> productItemIds = productItemRepository.findAllByProduct_id(productId);
+                    JSONObject variationOption = variationOptionRepository.findByProduct(variation.getId(), productItemIds);
+                    if(variationOption == null) {
+                        continue;
+                    }
+                    variationOptionTmp.setValue(variationOption.get("value").toString());
+                    variationOptionTmp.setUnixTime(Long.parseLong(variationOption.get("unix_time").toString()));
                 }
                 variationOptionTmp = variationOptionRepository.save(variationOptionTmp);
                 productItem = productItemRepository.save(productItem);

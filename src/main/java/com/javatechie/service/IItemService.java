@@ -9,8 +9,9 @@ import org.json.simple.JSONObject;
 
 public interface IItemService {
     JSONObject saveProduct(ProductDto productDto, CategoryDto categoryDto);
-    JSONObject updateProduct(ProductDto productDto, VariationDto variationDto, Integer categoryId, Integer brandId);
+    JSONObject updateProductDetail(Long productItemId, VariationDto variationDto);
     JSONObject findOneById(Long productId, boolean isFindAll);
     JSONArray findAll(Integer categoryId, Integer brandId, String key);
     JSONObject deleteProduct(Long productId);
+    JSONObject updateProduct(ProductDto productDto, Integer brandId);
 }

@@ -1,9 +1,6 @@
 package com.javatechie.controller;
 
-import com.javatechie.dto.CategoryDto;
-import com.javatechie.dto.ProductDto;
-import com.javatechie.dto.RequestItemDto;
-import com.javatechie.dto.RequestUpdate;
+import com.javatechie.dto.*;
 import com.javatechie.service.IItemService;
 import com.javatechie.service.IVariationService;
 import org.json.simple.JSONArray;
@@ -53,9 +50,9 @@ public class ItemController {
     }
 
     @PutMapping("/admin/api/item")
-    @PreAuthorize("hasAuthority('ADMIN')") // ok
-    public ResponseEntity<?> updateItem(@RequestBody RequestUpdate request, @RequestParam("categoryId")Integer categoryId, @RequestParam("brandId")Integer brandId) {
-        JSONObject response = itemService.updateProduct(request.getProduct(), request.getVariation(), categoryId, brandId);
+    @PreAuthorize("hasAuthority('ADMIN')") // chỉnh sửa thông tin product
+    public ResponseEntity<?> updateItem(@RequestBody ProductDto productDto, @RequestParam("brandId")Integer brandId) {
+        JSONObject response = itemService.updateProduct(productDto, brandId);
         if(response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);
         }
@@ -72,10 +69,19 @@ public class ItemController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/admin/api/item/detail") // ok
+    @PostMapping("/admin/api/item/detail")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> saveItemDetail(@RequestBody CategoryDto categoryDto, @RequestParam("productId") Long productId) {
         JSONObject response = variationService.saveVariationOption(categoryDto, productId);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/admin/api/item/detail") // chỉnh sửa thông tin chi tiết sản phẩm ==> test ok
+    public ResponseEntity<?> updateProductItemDetail(@RequestParam("productItemId") Long productItemId, @RequestBody VariationDto variationDto) {
+        JSONObject response = itemService.updateProductDetail(productItemId, variationDto);
         if(response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);
         }

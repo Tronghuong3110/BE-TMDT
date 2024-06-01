@@ -33,4 +33,7 @@ public interface ProductItemRepository extends JpaRepository<ProductItemEntity, 
                                                       @Param("key") String key);
 
     List<ProductItemEntity> findAllByProduct_Id(Long productId);
+
+    @Query(value = "select id from product_item where product_id = :productId ", nativeQuery = true)
+    List<Long> findAllByProduct_id(@Param("productId") Long productId);
 }

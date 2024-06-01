@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,8 +75,8 @@ public class ItemService implements IItemService {
             productItems.add(productItem);
 
             // lưu variation option
-            long unixTime = System.currentTimeMillis();
             for(VariationDto variationDto : categoryDto.getVariations()) {
+                long unixTime = System.currentTimeMillis();
                 List<VariationOptionEntity> variationOptions = new ArrayList<>();
                 VariationEntity variation = variationRepository.findById(variationDto.getId()).orElse(new VariationEntity());
                 VariationOptionEntity variationOptionTmp = new VariationOptionEntity();
@@ -104,79 +105,37 @@ public class ItemService implements IItemService {
         return response;
     }
 
+    @Transactional
     @Override
-    public JSONObject updateProduct(ProductDto productDto, VariationDto variationDto, Integer categoryId, Integer brandId) {
+    public JSONObject updateProductDetail(Long productItemId, VariationDto variationDto) {
         JSONObject response = new JSONObject();
         try {
             // Lấy ra productItem ==> lấy ra danh sách variation option ==> sửa trường value
             // nếu thay đổi category hoặc brand th update lại
             // thay đổi ảnh ( có thể xóa ảnh cũ và thêm ảnh mới )
-            ProductItemEntity productItem = productItemRepository.findById(productDto.getProductItemId()).orElse(null);
+            ProductItemEntity productItem = productItemRepository.findById(productItemId).orElse(null);
             if(productItem == null) {
                 response.put("code", 0);
                 response.put("message", "Sản phẩm không tồn tại !!");
                 return response;
             }
             // cập nhật value của variationOption
-            List<VariationOptionEntity> variationOptions = productItem.getVariationOptions();
+            List<VariationOptionEntity> variationOptions = productItem.getVariationOptions(); // lấy danh sách variationOption của 1 productItem
             ModelMapper mapper = MapperUtil.configModelMapper();
-            for(VariationOptionDto variationOptionDto : variationDto.getVariationOptions()) {
-                List<VariationOptionEntity> variationOptionEntities = variationOptions.stream().filter(variationOptionEntity -> variationOptionEntity.getId().equals(variationOptionDto.getId())).toList();
-                if(variationOptionEntities.size() <= 0) continue;
-                VariationOptionEntity variationOption = variationOptionEntities.get(0);
+            for(VariationOptionDto variationOptionDto : variationDto.getVariationOptions()) { // Lấy ra danh sách variationOption đang chỉnh sửa
+//                List<VariationOptionEntity> variationOptionEntities = variationOptions.stream().filter(variationOptionEntity -> variationOptionEntity.getId().equals(variationOptionDto.getId())).toList();
+//                if(variationOptionEntities.isEmpty()) continue;
+                VariationOptionEntity variationOption = variationOptionRepository.findById(variationOptionDto.getId()).orElse(new VariationOptionEntity());
                 mapper.map(variationOptionDto, variationOption);
-                variationOptionRepository.save(variationOption);
+                // cập nhật toàn bộ variationOption có của các productItem khác nhau mà thuộc cùng 1 product
+//                if(variationOptionDto.getValue() != null) {
+                List<Long> productItemIds = productItemRepository.findAllByProduct_id(productItem.getProduct().getId());
+                variationOptionRepository.updateValueByUnixTime(variationOptionDto.getValue(), variationOption.getUnixTime(), productItemIds);
+//                }
+//                variationOptionRepository.save(variationOption);
             }
-            // cập nhật thông tin về brand và category
-            ProductEntity product = productItem.getProduct();
-            if(!product.getCategory().getId().equals(categoryId)) {
-                CategoryEntity category = categoryRepository.findById(categoryId).orElse(new CategoryEntity());
-                product.setCategory(category);
-            }
-            if(!product.getBrand().getId().equals(brandId)) {
-                BrandEntity brand = brandRepository.findById(brandId).orElse(new BrandEntity());
-                product.setBrand(brand);
-            }
-            product = productRepository.save(product);
-            // cập nhật ảnh
-            List<Integer> idOlds = productDto.getImages()
-                    .stream()
-                    .filter(image -> image.getId() != null)
-                    .map(ImageDto::getId)
-                    .toList();
-            List<ImageEntity> listImageOld = imageRepository.findAllByProduct_Id(product.getId());
-            List<ImageDto> imageDtos = new ArrayList<>();
-            // loại bỏ những hình ảnh đã xóa
-            for(ImageEntity image : listImageOld) {
-                if(!idOlds.contains(image.getId())) {
-                    imageRepository.delete(image);
-                }
-            }
-            // thêm mới image mới hoặc update lại path của image cũ
-            for(ImageDto image : productDto.getImages()) {
-                ImageDto imageDto = new ImageDto();
-                ImageEntity imageEntity = null;
-                if(image.getId() != null) {
-                    imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
-                }
-                else {
-                    imageEntity = new ImageEntity();
-                }
-                mapper.map(image, imageEntity);
-                imageEntity.setProduct(product);
-                imageEntity = imageRepository.save(imageEntity);
-                mapper.map(imageEntity, imageDto);
-                imageDtos.add(imageDto);
-            }
-            mapper.map(product, productDto);
-            productDto.setImages(imageDtos);
-            productDto.setProductItems(null);
-            productDto.getCategory().setVariations(null);
-            productDto.setComments(null);
-            productDto.setReviews(null);
             response.put("code", 1);
-            response.put("message", "Cập nhật thông tin sản phẩm thành công !!");
-            response.put("item", productDto);
+            response.put("message", "Chỉnh sửa thông tin sản chi tiết sản phẩm thành công !!");
             return response;
         }
         catch (Exception e) {
@@ -300,6 +259,67 @@ public class ItemService implements IItemService {
             e.printStackTrace();
             response.put("code", 0);
             response.put("message", "Xóa sản phẩm thất bại !!");
+        }
+        return response;
+    }
+
+    @Override
+    public JSONObject updateProduct(ProductDto productDto, Integer brandId) {
+        JSONObject response = new JSONObject();
+        try {
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            ProductEntity product = productRepository.findById(productDto.getId()).orElse(new ProductEntity());
+            mapper.map(productDto, product);
+            // cập nhật thông tin về brand
+            if(!product.getBrand().getId().equals(brandId)) {
+                BrandEntity brand = brandRepository.findById(brandId).orElse(new BrandEntity());
+                product.setBrand(brand);
+            }
+            product = productRepository.save(product);
+            // cập nhật ảnh
+            List<Integer> idOlds = productDto.getImages()
+                    .stream()
+                    .filter(image -> image.getId() != null)
+                    .map(ImageDto::getId)
+                    .toList();
+            List<ImageEntity> listImageOld = imageRepository.findAllByProduct_Id(product.getId());
+            List<ImageDto> imageDtos = new ArrayList<>();
+            // loại bỏ những hình ảnh đã xóa
+            for(ImageEntity image : listImageOld) {
+                if(!idOlds.contains(image.getId())) {
+                    imageRepository.delete(image);
+                }
+            }
+            // thêm mới image mới hoặc update lại path của image cũ
+            for(ImageDto image : productDto.getImages()) {
+                ImageDto imageDto = new ImageDto();
+                ImageEntity imageEntity = null;
+                if(image.getId() != null) {
+                    imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+                }
+                else {
+                    imageEntity = new ImageEntity();
+                }
+                mapper.map(image, imageEntity);
+                imageEntity.setProduct(product);
+                imageEntity = imageRepository.save(imageEntity);
+                mapper.map(imageEntity, imageDto);
+                imageDtos.add(imageDto);
+            }
+            mapper.map(product, productDto);
+            productDto.setComments(null);
+            productDto.setReviews(null);
+            productDto.setProductItems(null);
+            productDto.getCategory().setVariations(null);
+            response.put("code", 1);
+            response.put("message", "Cập nhật thông tin sản phẩm thành công !!");
+            response.put("product", productDto);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Cập nhật thông tin sản phẩm thất bại !!");
+            response.put("product", null);
         }
         return response;
     }
