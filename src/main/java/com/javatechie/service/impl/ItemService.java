@@ -198,6 +198,7 @@ public class ItemService implements IItemService {
             List<JSONArray> itemDetails = new ArrayList<>();
             for(ProductItemEntity productItem : productItems) {
                     JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
+                    if(object == null) continue;
                     JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
                     JSONObject quantity = new JSONObject();
                     quantity.put("quantity_stock", productItem.getQuantityInStock());
