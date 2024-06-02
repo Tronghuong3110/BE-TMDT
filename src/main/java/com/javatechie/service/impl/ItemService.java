@@ -159,6 +159,7 @@ public class ItemService implements IItemService {
                 return response;
             }
             // lấy thông tin sản phẩm
+            response.put("productId", productId);
             response.put("name", product.getName());
             // Lấy danh sách ảnh
             List<ImageEntity> imageEntities = product.getImages();
@@ -197,15 +198,16 @@ public class ItemService implements IItemService {
             List<ProductItemEntity> productItems = productItemRepository.findAllByProduct_Id(productId);
             List<JSONArray> itemDetails = new ArrayList<>();
             for(ProductItemEntity productItem : productItems) {
-                    JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
-                    if(object == null) continue;
-                    JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
-                    JSONObject quantity = new JSONObject();
-                    quantity.put("quantity_stock", productItem.getQuantityInStock());
-                    quantity.put("quantity_sold", productItem.getQuantitySold());
-                    quantity.put("productItem", productItem.getId());
-                    productDetail.add(quantity);
-                    itemDetails.add(productDetail);
+                JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
+                if(object == null) continue;
+                JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                JSONObject quantity = new JSONObject();
+                quantity.put("quantity_stock", productItem.getQuantityInStock());
+                quantity.put("quantity_sold", productItem.getQuantitySold());
+                quantity.put("productItem", productItem.getId());
+                quantity.put("productItemId", productItem.getId());
+                productDetail.add(quantity);
+                itemDetails.add(productDetail);
             }
             response.put("itemDetails", itemDetails);
 
