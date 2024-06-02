@@ -25,6 +25,7 @@ public class SupplierController {
         }
         return ResponseEntity.ok(response);
     }
+
     @PutMapping("/supplier")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> updateSupplier(@RequestBody SupplierDto supplierDto) {
@@ -34,12 +35,14 @@ public class SupplierController {
         }
         return ResponseEntity.ok(response);
     }
+
     @GetMapping("/supplier")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> findOne(@RequestParam("id") Long id) {
         SupplierDto supplier = supplierService.findIOneSupplier(id);
         return ResponseEntity.ok(supplier);
     }
+
     @GetMapping("/suppliers")
     @PreAuthorize("hasAuthority('EMPLOYEE') or hasAuthority('ADMIN')")
     public ResponseEntity<?> findAll() {

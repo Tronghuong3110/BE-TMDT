@@ -42,15 +42,17 @@ public class ItemService implements IItemService {
     private BrandRepository brandRepository;
 
     @Override
-    public JSONObject saveProduct(ProductDto productDto, CategoryDto categoryDto) {
+    public JSONObject saveProduct(ProductDto productDto, CategoryDto categoryDto, Integer brandId) {
         JSONObject response = new JSONObject();
         try {
             CategoryEntity category = categoryRepository.findById(categoryDto.getId()).orElse(new CategoryEntity());
+            BrandEntity brand = brandRepository.findByIdAndDeleted(brandId, 0).orElse(new BrandEntity());
             ProductEntity product = new ProductEntity();
             product.setId(System.currentTimeMillis());
             product.setName(productDto.getName());
             product.setCategory(category);
             product.setDeleted(false);
+            product.setBrand(brand);
             product = productRepository.save(product);
 
             // lưu ảnh của product

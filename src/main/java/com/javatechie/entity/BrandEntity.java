@@ -15,6 +15,7 @@ public class BrandEntity {
     private String name;
     @Column(name = "description", columnDefinition = "longtext")
     private String description;
+    private Integer deleted;
 
     @OneToMany(mappedBy = "brand")
     private List<ProductEntity> products;

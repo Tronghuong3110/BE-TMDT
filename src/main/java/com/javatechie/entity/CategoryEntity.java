@@ -18,6 +18,7 @@ public class CategoryEntity {
     private String description;
     @Column(name = "code")
     private String code;
+    private Integer deleted;
 
     @OneToMany(mappedBy = "category")
     private List<ProductEntity> products;

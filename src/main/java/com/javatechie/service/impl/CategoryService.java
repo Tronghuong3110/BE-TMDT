@@ -33,13 +33,13 @@ public class CategoryService implements ICategoryService {
             categoryEntity = categoryRepository.save(categoryEntity);
             BeanUtils.copyProperties(categoryEntity, categoryDto);
             response.put("code", 1);
-            response.put("message", "Add category success");
+            response.put("message", "Thêm mới thể loại thành công !!");
             response.put("category", categoryDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", e.getMessage());
+            response.put("message", "Thêm mới thể loại thất bại");
             response.put("category", null);
         }
         return response;
@@ -67,10 +67,10 @@ public class CategoryService implements ICategoryService {
     public JSONObject findOneById(Integer id) {
         JSONObject response = new JSONObject();
         try {
-            CategoryEntity categoryEntity = categoryRepository.findById(id).orElse(null);
+            CategoryEntity categoryEntity = categoryRepository.findByIdAndDeleted(id, 0).orElse(null);
             if(categoryEntity == null) {
                 response.put("code", 0);
-                response.put("message", "Can not found category with id = " + id);
+                response.put("message", "Thể loại không tồn tại !!");
                 return response;
             }
             CategoryDto categoryDto = new CategoryDto();
@@ -93,22 +93,22 @@ public class CategoryService implements ICategoryService {
             CategoryEntity categoryEntity = categoryRepository.findById(categoryDto.getId()).orElse(null);
             if(categoryEntity == null) {
                 response.put("code", 0);
-                response.put("message", "Can not found category with id = " + categoryDto.getId());
+                response.put("message", "Không tìm thấy thể loại !!");
             }
             categoryEntity = convertToEntity(categoryEntity, categoryDto);
             if(categoryEntity == null) {
                 response.put("code", 0);
-                response.put("message", "Can not change information of category with id = " + categoryDto.getId());
+                response.put("message", "Không thể thay đổi thông tin thể loại !!");
                 return response;
             }
             categoryRepository.save(categoryEntity);
             response.put("code", 1);
-            response.put("message", "Update category success");
+            response.put("message", "Cập nhật thông tin thể loại thành công");
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Update category fail");
+            response.put("message", "Cập nhật thông tin thể loại thất bại !!");
         }
         return response;
     }
@@ -117,14 +117,20 @@ public class CategoryService implements ICategoryService {
     public JSONObject deleteCategory(Integer id) {
         JSONObject response = new JSONObject();
         try {
-            categoryRepository.deleteById(id);
+            CategoryEntity category = categoryRepository.findById(id).orElse(null);
+            if(category == null) {
+                response.put("code", 0);
+                response.put("message", "Thể loại không tồn tại !!");
+                return response;
+            }
+            category.setDeleted(1);
             response.put("code", 1);
-            response.put("message", "Delete category success");
+            response.put("message", "Xóa thể loại thành công !!");
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Delete category fail");
+            response.put("message", "Xóa thể loại thất bại !!");
         }
         return response;
     }

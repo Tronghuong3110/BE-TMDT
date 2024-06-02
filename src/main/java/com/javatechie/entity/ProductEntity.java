@@ -16,6 +16,8 @@ public class ProductEntity {
     @Id
     private Long id;
     private String name;
+    @Column(columnDefinition = "longtext")
+    private String description;
     private Boolean deleted;
 
     @OneToMany(mappedBy = "product")

@@ -23,8 +23,8 @@ public class ItemController {
 
     @PostMapping("/admin/api/item")
     @PreAuthorize("hasAuthority('ADMIN')") // ok
-    public ResponseEntity<?> saveItem(@RequestBody RequestItemDto requestItemDto) {
-        JSONObject response = itemService.saveProduct(requestItemDto.getProduct(), requestItemDto.getCategory());
+    public ResponseEntity<?> saveItem(@RequestBody RequestItemDto requestItemDto, @RequestParam("brandId") Integer brandId) {
+        JSONObject response = itemService.saveProduct(requestItemDto.getProduct(), requestItemDto.getCategory(), brandId);
         if(response.get("code").equals(0)) {
             return ResponseEntity.badRequest().body(response);
         }

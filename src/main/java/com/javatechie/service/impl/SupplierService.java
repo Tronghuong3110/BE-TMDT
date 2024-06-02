@@ -26,19 +26,19 @@ public class SupplierService implements ISupplierService {
             boolean validatePhoneNumber = checkValidatePhoneNumber(supplierDto.getPhoneNumber());
             if(!validatePhoneNumber) {
                 response.put("code", 0);
-                response.put("message", "Phone number invalid");
+                response.put("message", "Số điện thoại không hợp lệ !!");
                 return response;
             }
             boolean existsNameSupplier = supplierRepository.existsByName(supplierDto.getName());
             if(existsNameSupplier) {
                 response.put("code", 0);
-                response.put("message", "Supplier name already exists!!");
+                response.put("message", "Tên nhà cung cấp đã tồn tại !!");
                 return response;
             }
             boolean existsPhoneNumber = supplierRepository.existsByPhoneNumber(supplierDto.getPhoneNumber());
             if(existsPhoneNumber) {
                 response.put("code", 0);
-                response.put("message", "Supplier phone number already exists!!");
+                response.put("message", "Số điện thoại nhà cung cấp đã tồn tại !!");
                 return response;
             }
             SupplierEntity supplier = new SupplierEntity();
@@ -48,13 +48,13 @@ public class SupplierService implements ISupplierService {
             supplier = supplierRepository.save(supplier);
             BeanUtils.copyProperties(supplier, supplierDto);
             response.put("code", 1);
-            response.put("message", "Add new supplier success");
+            response.put("message", "Thêm mới nhà cung cấp thành công");
             response.put("supplier", supplierDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Add new supplier fail");
+            response.put("message", "Thêm mới nhà cung cấp thất bại !!");
         }
         return response;
     }
@@ -99,12 +99,12 @@ public class SupplierService implements ISupplierService {
             supplier.setDeleted(1);
             supplierRepository.save(supplier);
             response.put("code", 1);
-            response.put("message", "Delete supplier success");
+            response.put("message", "Xóa nhà cung cấp thành công !!");
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Delete supplier fail");
+            response.put("message", "Xóa nhà cung cấp thất bại !!");
         }
         return response;
     }
@@ -116,7 +116,7 @@ public class SupplierService implements ISupplierService {
             SupplierEntity oldSupplier = supplierRepository.findByIdAndNameOrPhoneNumberAndDeleted(supplierDto.getId(), supplierDto.getName(), supplierDto.getPhoneNumber(), 0).orElse(null);
             if(oldSupplier != null) {
                 response.put("code", 0);
-                response.put("message", "Name or phone number already exists");
+                response.put("message", "Tên hoặc số điện thoại đã tồn tại !!");
                 return response;
             }
             boolean validatePhoneNumber = true;
@@ -125,7 +125,7 @@ public class SupplierService implements ISupplierService {
             }
             if(!validatePhoneNumber) {
                 response.put("code", 0);
-                response.put("message", "Phone number invalid");
+                response.put("message", "Số điện thoại không hợp lệ !!");
                 return response;
             }
             oldSupplier = supplierRepository.findByIdAndDeleted(supplierDto.getId(), 0).orElse(new SupplierEntity());
@@ -133,13 +133,13 @@ public class SupplierService implements ISupplierService {
             supplierRepository.save(oldSupplier);
             BeanUtils.copyProperties(oldSupplier, supplierDto);
             response.put("code", 1);
-            response.put("message", "Update supplier success");
+            response.put("message", "Cập nhật thông tin nhà cung cấp thành công !!");
             response.put("supplier", supplierDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Update supplier fail");
+            response.put("message", "Cập nhật thông tin nhà cung cấp thất bại !!");
         }
         return response;
     }
