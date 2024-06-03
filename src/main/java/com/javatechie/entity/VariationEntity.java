@@ -18,6 +18,7 @@ public class VariationEntity {
     private Long id;
     private String name;
     private String nameVie;
+    private Integer important;
     @OneToMany(mappedBy = "variation", fetch = FetchType.LAZY)
     private List<VariationOptionEntity> variationOptions;
     @ManyToOne(fetch = FetchType.LAZY)

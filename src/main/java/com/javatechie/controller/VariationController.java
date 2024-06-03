@@ -47,6 +47,15 @@ public class VariationController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/variation")
+    public ResponseEntity<?> findOne(@RequestParam("variationId") Long variationId) {
+        VariationDto response = variationService.findOneVariation(variationId);
+        if(response == null) {
+            return ResponseEntity.badRequest().body("Không tồn tại variation !!");
+        }
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/variation")
     public ResponseEntity<?> deleteVariation(@RequestParam("variationId") Long variationId) {
         JSONObject response = variationService.deleteVariation(variationId);

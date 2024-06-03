@@ -92,11 +92,9 @@ public class ItemService implements IItemService {
                 productItem.setVariationOptions(variationOptions);
                 productItem = productItemRepository.save(productItem);
             }
+            response = findOneById(product.getId(), true);
             response.put("code", 1);
             response.put("message", "Thêm mới sản phẩm thành công!!");
-            productDto.setId(product.getId());
-            productDto.setProductItemId(productItem.getId());
-            response.put("product", productDto);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -164,7 +162,7 @@ public class ItemService implements IItemService {
             response.put("productId", productId);
             response.put("name", product.getName());
             // Lấy danh sách ảnh
-            List<ImageEntity> imageEntities = product.getImages();
+            List<ImageEntity> imageEntities = imageRepository.findAllByProduct_Id(productId);
             List<ImageDto> images = new ArrayList<>();
             ModelMapper mapper = MapperUtil.configModelMapper();
             for(ImageEntity image : imageEntities) {
@@ -173,28 +171,31 @@ public class ItemService implements IItemService {
                 images.add(imageDto);
             }
             response.put("images", images);
-            // Lấy danh sách review
-            List<ReviewEntity> reviewEntities = product.getReviews();
-            List<ReviewDto> reviews = new ArrayList<>();
-            for(ReviewEntity review : reviewEntities) {
-                ReviewDto reviewDto = new ReviewDto();
-                mapper.map(review, reviewDto);
-                reviews.add(reviewDto);
+            // Lấy danh sách review (dành cho lấy ra thông tin sản phẩm chi tiêt)
+            if(!isFindAll) {
+                List<ReviewEntity> reviewEntities = product.getReviews();
+                List<ReviewDto> reviews = new ArrayList<>();
+                for(ReviewEntity review : reviewEntities) {
+                    ReviewDto reviewDto = new ReviewDto();
+                    mapper.map(review, reviewDto);
+                    reviews.add(reviewDto);
+                }
+                response.put("reviews", reviews);
             }
-            response.put("reviews", !isFindAll ? reviews : null);
-            // Lấy danh sách comment
-            List<CommentEntity> commentEntities = product.getComments();
-            List<CommentDto> comments = new ArrayList<>();
-            for(CommentEntity comment : commentEntities) {
-                CommentDto commentDto = new CommentDto();
-                mapper.map(comment, commentDto);
-                commentDto.setFullName(comment.getUser().getName());
-                commentDto.setAvatarPath(comment.getUser().getAvatarPath());
-                commentDto.setUser(null);
-                comments.add(commentDto);
+            // Lấy danh sách comment (danh cho lấy ra sản phẩm chi tiết)
+            if(!isFindAll) {
+                List<CommentEntity> commentEntities = product.getComments();
+                List<CommentDto> comments = new ArrayList<>();
+                for(CommentEntity comment : commentEntities) {
+                    CommentDto commentDto = new CommentDto();
+                    mapper.map(comment, commentDto);
+                    commentDto.setFullName(comment.getUser().getName());
+                    commentDto.setAvatarPath(comment.getUser().getAvatarPath());
+                    commentDto.setUser(null);
+                    comments.add(commentDto);
+                }
+                response.put("comments", comments);
             }
-            response.put("comments", !isFindAll ? comments : null);
-
             // Lấy danh sách itemDetail (Là danh sách productItem)
             JSONParser parser = new JSONParser();
             List<ProductItemEntity> productItems = productItemRepository.findAllByProduct_Id(productId);
@@ -206,8 +207,8 @@ public class ItemService implements IItemService {
                 JSONObject quantity = new JSONObject();
                 quantity.put("quantity_stock", productItem.getQuantityInStock());
                 quantity.put("quantity_sold", productItem.getQuantitySold());
-                quantity.put("productItem", productItem.getId());
                 quantity.put("productItemId", productItem.getId());
+                quantity.put("price", productItem.getPrice());
                 productDetail.add(quantity);
                 itemDetails.add(productDetail);
             }
@@ -218,11 +219,17 @@ public class ItemService implements IItemService {
             CategoryDto categoryDto = new CategoryDto();
             mapper.map(category, categoryDto);
             categoryDto.setVariations(null);
+            // Lấy thông tin về brand
+            BrandDto brandDto = new BrandDto();
+            BrandEntity brand = product.getBrand();
+            mapper.map(brand, brandDto);
+            brandDto.setItems(null);
             // Tính trung bình
             JSONObject object = reviewRepository.calculatorAvgRakingByItem(product.getId());
             response.put("rating", object == null ? 0 : object.get("rating"));
             response.put("number_rating", object == null ? 0 : object.get("number_rating"));
             response.put("category", categoryDto);
+            response.put("brand", brandDto);
             response.put("code", 1);
         }
         catch (Exception e) {

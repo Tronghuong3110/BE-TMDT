@@ -12,6 +12,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,13 +45,13 @@ public class VariationService implements IVariationService {
             variation = variationRepository.save(variation);
             BeanUtils.copyProperties(variation, variationDto);
             response.put("code", 1);
-            response.put("message", "Add new variation success");
+            response.put("message", "Thêm mới thông tin thành công !!");
             response.put("variation", variationDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Add new variation fail");
+            response.put("message", "Thêm mới thông tin thất bại !!");
             response.put("variation", new VariationEntity());
         }
         return response;
@@ -76,7 +77,7 @@ public class VariationService implements IVariationService {
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Update variation fail");
+            response.put("message", "Cập nhật thông tin thất bại !!");
             response.put("variation", new VariationDto());
         }
         return response;
@@ -101,7 +102,20 @@ public class VariationService implements IVariationService {
     }
 
     @Override
-    public VariationDto findOneVariation(int id) {
+    public VariationDto findOneVariation(Long id) {
+        try {
+            VariationEntity variation = variationRepository.findById(id).orElse(null);
+            if(variation == null) {
+                return null;
+            }
+            VariationDto variationDto = new VariationDto();
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(variation, variationDto);
+            return variationDto;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

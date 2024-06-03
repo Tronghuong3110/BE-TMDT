@@ -10,7 +10,7 @@ public interface IVariationService {
     JSONObject saveVariation(VariationDto variationDto, int categoryId);
     JSONObject updateVariation(VariationDto variationDto, int categoryId);
     List<VariationDto> findAllByCategory(int categoryId);
-    VariationDto findOneVariation(int id);
+    VariationDto findOneVariation(Long id);
     JSONObject deleteVariation(Long id);
     JSONObject saveVariationOption(CategoryDto categoryDto, Long productId);
 }
