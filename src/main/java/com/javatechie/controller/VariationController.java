@@ -32,7 +32,7 @@ public class VariationController {
     @GetMapping("/variations")
     public ResponseEntity<?> findAllVariationByCategory(@RequestParam("categoryId") Integer categoryId) {
         List<VariationDto> responses = variationService.findAllByCategory(categoryId);
-        if(responses.size() <= 0) {
+        if(responses.isEmpty()) {
             return ResponseEntity.badRequest().body(new ArrayList<>());
         }
         return ResponseEntity.ok(responses);
