@@ -230,6 +230,7 @@ public class ItemService implements IItemService {
             response.put("number_rating", object == null ? 0 : object.get("number_rating"));
             response.put("category", categoryDto);
             response.put("brand", brandDto);
+            response.put("description", product.getDescription());
             response.put("code", 1);
         }
         catch (Exception e) {
