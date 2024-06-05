@@ -40,7 +40,7 @@ public class CartService implements ICartService {
         JSONObject response = new JSONObject();
         try {
             CartItemEntity cartItem = new CartItemEntity();
-            ProductItemEntity productItem = productItemRepository.findById(cartItemDto.getProductItemId()).orElse(null);
+            ProductItemEntity productItem = productItemRepository.findByIdAndDeleted(cartItemDto.getProductItemId(), 0).orElse(null);
 //            ItemDetailEntity itemDetail = itemDetailRepository.findByIdAndIsAvailableAndDeleted(cartItemDto.getItemDetail().getId(), true, 0).orElse(null);
             if(productItem == null) {
                 response.put("code", 0);
@@ -128,7 +128,7 @@ public class CartService implements ICartService {
                 BeanUtils.copyProperties(cartItem, cartItemDto);
                 Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
                 cartItemDto.setPrice(price);
-                ProductEntity product = productRepository.findById(cartItem.getProductItem().getProduct().getId()).orElse(new ProductEntity());
+                ProductEntity product = productRepository.findByIdAndDeleted(cartItem.getProductItem().getProduct().getId(), false).orElse(new ProductEntity());
                 // Lấy ra danh sách ảnh
                 List<ImageEntity> images = product.getImages();
                 List<ImageDto> imageDtos = new ArrayList<>();

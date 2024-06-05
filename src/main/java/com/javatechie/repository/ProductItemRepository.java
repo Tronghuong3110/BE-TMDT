@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductItemRepository extends JpaRepository<ProductItemEntity, Long> {
@@ -17,7 +18,7 @@ public interface ProductItemRepository extends JpaRepository<ProductItemEntity, 
                     "JOIN product_variation ON variation_option.id = product_variation.variation_option_id " +
                     "JOIN variation ON variation.id = variation_option.variation_id " +
                     "JOIN product_item ON product_variation.product_item_id = product_item.id " +
-                    "WHERE product_item.id = :productItemId ", nativeQuery = true)
+                    "WHERE product_item.id = :productItemId and product_item.deleted = 0", nativeQuery = true)
     JSONObject findAllProductItemDetailByProductItem(@Param("productItemId") Long productItemId);
 
     @Query(value = "select product_item.* from product_item " +
@@ -31,8 +32,9 @@ public interface ProductItemRepository extends JpaRepository<ProductItemEntity, 
                                                       @Param("brandId") Integer brandId,
                                                       @Param("key") String key);
 
-    List<ProductItemEntity> findAllByProduct_Id(Long productId);
+    List<ProductItemEntity> findAllByProduct_IdAndDeleted(Long productId, Integer deleted);
 
-    @Query(value = "select id from product_item where product_id = :productId ", nativeQuery = true)
+    @Query(value = "select id from product_item where product_id = :productId and deleted = 0", nativeQuery = true)
     List<Long> findAllByProduct_id(@Param("productId") Long productId);
+    Optional<ProductItemEntity> findByIdAndDeleted(Long id, Integer deleted);
 }

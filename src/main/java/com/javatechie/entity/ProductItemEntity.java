@@ -19,6 +19,7 @@ public class ProductItemEntity {
     private Integer quantityInStock;
     private Integer quantitySold;
     private Float price;
+    private Integer deleted;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

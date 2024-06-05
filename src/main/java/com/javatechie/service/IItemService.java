@@ -14,4 +14,5 @@ public interface IItemService {
     JSONArray findAll(Integer categoryId, Integer brandId, String key);
     JSONObject deleteProduct(Long productId);
     JSONObject updateProduct(ProductDto productDto, Integer brandId);
+    JSONObject deleteItemDetail(Long productItemId);
 }

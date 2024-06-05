@@ -198,7 +198,7 @@ public class ItemService implements IItemService {
             }
             // Lấy danh sách itemDetail (Là danh sách productItem)
             JSONParser parser = new JSONParser();
-            List<ProductItemEntity> productItems = productItemRepository.findAllByProduct_Id(productId);
+            List<ProductItemEntity> productItems = productItemRepository.findAllByProduct_IdAndDeleted(productId, 0);
             List<JSONArray> itemDetails = new ArrayList<>();
             for(ProductItemEntity productItem : productItems) {
                 JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
@@ -333,6 +333,27 @@ public class ItemService implements IItemService {
             response.put("code", 0);
             response.put("message", "Cập nhật thông tin sản phẩm thất bại !!");
             response.put("product", null);
+        }
+        return response;
+    }
+
+    @Override
+    public JSONObject deleteItemDetail(Long productItemId) {
+        JSONObject response = new JSONObject();
+        try {
+            ProductItemEntity productItem = productItemRepository.findById(productItemId).orElse(null);
+            if(productItem != null) {
+                productItem.setDeleted(1);
+                productItemRepository.save(productItem);
+            }
+            response.put("code", 1);
+            response.put("message", "Xóa sản phẩm chi tiết thành công !!");
+            return response;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Xóa sản phẩm chi tiết thất bại !!");
         }
         return response;
     }

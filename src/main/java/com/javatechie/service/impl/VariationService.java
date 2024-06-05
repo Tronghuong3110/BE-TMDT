@@ -186,14 +186,6 @@ public class VariationService implements IVariationService {
                 productDetail.put("id_variation_option", variationOptionTmp.getId());
                 productItemDetails.add(productDetail);
             }
-            /*
-            * {
-                    "quantity_sold": 0,
-                    "quantity_stock": 0,
-                    "price": 0.0,
-                    "productItemId": 1717263880533
-                }
-            * */
             JSONObject infoDetail = new JSONObject();
             infoDetail.put("quantity_sold", productItem.getQuantitySold());
             infoDetail.put("quantity_stock", productItem.getQuantityInStock());

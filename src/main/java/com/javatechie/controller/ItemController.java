@@ -87,4 +87,12 @@ public class ItemController {
         }
         return ResponseEntity.ok(response);
     }
+    @PutMapping("/admin/api/item/detail") // chỉnh sửa thông tin chi tiết sản phẩm ==> test ok
+    public ResponseEntity<?> updateProductItemDetail(@RequestParam("productItemId") Long productItemId) {
+        JSONObject response = itemService.deleteItemDetail(productItemId);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 }
