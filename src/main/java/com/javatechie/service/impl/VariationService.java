@@ -6,6 +6,7 @@ import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IVariationService;
 import com.javatechie.util.MapperUtil;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -142,7 +143,7 @@ public class VariationService implements IVariationService {
         JSONObject response = new JSONObject();
         try {
             // mỗi bộ list<Variation> đại diện cho 1 sản phẩm chi tiết của sản phẩm
-            JSONObject productDetail = new JSONObject();
+            List<JSONObject> productItemDetails = new ArrayList<>();
             ProductEntity product = productRepository.findById(productId).orElse(new ProductEntity());
             // Tạo mới 1 sản phẩm chi tiết của 1 sản phẩm ==> set số lượng đã bán, số lượng trong kho, giá = 0
             ProductItemEntity productItem = new ProductItemEntity();
@@ -158,6 +159,7 @@ public class VariationService implements IVariationService {
             for(VariationEntity variation : productItem.getProduct().getCategory().getVariations()) { // duyệt toàn bộ variation theo category của sản phầm
                 long unixTime = System.currentTimeMillis();
                 // kiểm tra xem variation đang xét có được chỉnh sửa hay không
+                JSONObject productDetail = new JSONObject();
                 List<VariationDto> variationDtos = categoryDto.getVariations().stream().filter(variationTmp -> variationTmp.getId().equals(variation.getId())).toList();
                 VariationOptionEntity variationOptionTmp = new VariationOptionEntity();
                 variationOptionTmp.setVariation(variation);
@@ -178,12 +180,28 @@ public class VariationService implements IVariationService {
                 }
                 variationOptionTmp = variationOptionRepository.save(variationOptionTmp);
                 productItem = productItemRepository.save(productItem);
-                productDetail.put(variation.getName(), variationOptionTmp.getValue());
+                productDetail.put("name", variation.getName());
+                productDetail.put("value", variationOptionTmp.getValue());
+                productDetail.put("important", variation.getImportant());
+                productDetail.put("id_variation_option", variationOptionTmp.getId());
+                productItemDetails.add(productDetail);
             }
-            productDetail.put("productItemId", productItem.getId());
+            /*
+            * {
+                    "quantity_sold": 0,
+                    "quantity_stock": 0,
+                    "price": 0.0,
+                    "productItemId": 1717263880533
+                }
+            * */
+            JSONObject infoDetail = new JSONObject();
+            infoDetail.put("quantity_sold", productItem.getQuantitySold());
+            infoDetail.put("quantity_stock", productItem.getQuantityInStock());
+            infoDetail.put("price", productItem.getPrice());
+            infoDetail.put("productItemId", productItem.getId());
             response.put("code", 1);
             response.put("message", "Thêm mới thông tin thành công !!");
-            response.put("itemDetail", productDetail);
+            response.put("itemDetail", productItemDetails);
         }
         catch (Exception e) {
             e.printStackTrace();
