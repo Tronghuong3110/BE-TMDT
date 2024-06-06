@@ -166,4 +166,77 @@ public class CartService implements ICartService {
         }
         return null;
     }
+
+    @Override
+    public JSONObject updateCart(Integer cartItemId, Integer quantity) {
+        JSONObject response = new JSONObject();
+        try {
+            CartItemEntity cartItem = cartItemRepository.findById(cartItemId).orElse(new CartItemEntity());
+            ProductItemEntity productItem = cartItem.getProductItem();
+            cartItem.setQuantity(quantity);
+            cartItem = cartItemRepository.save(cartItem);
+            CartItemDto cartItemDto = new CartItemDto();
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(cartItem, cartItemDto);
+            Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+            mapper.map(cartItem, cartItemDto);
+            cartItemDto.setTotalPrice(price);
+            ProductEntity product = productRepository.findById(cartItem.getProductItem().getProduct().getId()).orElse(new ProductEntity());
+            // Lấy ra danh sách ảnh
+            List<ImageEntity> images = product.getImages();
+            List<ImageDto> imageDtos = new ArrayList<>();
+            for(ImageEntity image : images) {
+                ImageDto imageDto = new ImageDto();
+                mapper.map(image, imageDto);
+                imageDtos.add(imageDto);
+            }
+            cartItemDto.setProductId(product.getId());
+            cartItemDto.setImages(imageDtos);
+            JSONParser parser = new JSONParser();
+            JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(cartItem.getProductItem().getId());
+            JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+            JSONObject quantityObj = new JSONObject();
+            quantityObj.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
+            quantityObj.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
+            quantityObj.put("productItemId", cartItem.getProductItem().getId());
+            quantityObj.put("price", cartItem.getProductItem().getPrice());
+            productDetail.add(quantityObj);
+            cartItemDto.setProductItemDetail(productDetail);
+            cartItemDto.setProductName(product.getName());
+            // Lấy ra category
+            CategoryEntity category = product.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            mapper.map(category, categoryDto);
+            categoryDto.setVariations(null);
+            cartItemDto.setCategory(categoryDto);
+            cartItemDto.setProductItemDetail(productDetail);
+
+            response.put("code", 1);
+            response.put("message", "Cập nhật thông tin giỏ hàng thành công !!");
+            response.put("cartItem", cartItemDto);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Cập nhật thông tin giỏ hàng thất bại !!");
+            response.put("cartItem", null);
+        }
+        return response;
+    }
+
+    @Override
+    public JSONObject deleteItemInCart(Integer cartItem) {
+        JSONObject response = new JSONObject();
+        try {
+            cartItemRepository.deleteById(cartItem);
+            response.put("code", 1);
+            response.put("message", "Xóa sản phẩm trong giỏ hàng thành công !!");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Xóa sản phẩm trong giỏ hàng thất bại !!");
+        }
+        return response;
+    }
 }

@@ -9,4 +9,6 @@ public interface ICartService {
 
     JSONObject addItemToCart(CartItemDto cartItemDto);
     List<CartItemDto> findAllItemInCartByUser();
+    JSONObject updateCart(Integer cartItemId, Integer quantity);
+    JSONObject deleteItemInCart(Integer cartItem);
 }

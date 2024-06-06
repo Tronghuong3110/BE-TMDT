@@ -38,4 +38,22 @@ public class CartController {
         }
         return ResponseEntity.ok(listCartItem);
     }
+
+    @PutMapping("/customer/api/cart")
+    public ResponseEntity<?> updateItemInCart(@RequestParam("cartItemId")Integer cartItemId, @RequestParam("quantity")Integer quantity) {
+        JSONObject response = cartService.updateCart(cartItemId, quantity);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/customer/api/cart")
+    public ResponseEntity<?> deleteItemInCart(@RequestParam("cartItemId") Integer cartItemId) {
+        JSONObject response = cartService.deleteItemInCart(cartItemId);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 }
