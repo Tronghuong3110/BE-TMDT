@@ -87,7 +87,7 @@ public class ItemController {
         }
         return ResponseEntity.ok(response);
     }
-    @PutMapping("/admin/api/item/detail") // chỉnh sửa thông tin chi tiết sản phẩm ==> test ok
+    @DeleteMapping("/admin/api/item/detail") // xóa thông tin sản phẩm chi tiết
     public ResponseEntity<?> updateProductItemDetail(@RequestParam("productItemId") Long productItemId) {
         JSONObject response = itemService.deleteItemDetail(productItemId);
         if(response.get("code").equals(0)) {
