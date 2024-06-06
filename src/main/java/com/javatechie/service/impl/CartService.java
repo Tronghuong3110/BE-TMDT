@@ -91,13 +91,22 @@ public class CartService implements ICartService {
             cartItemDto.setProductId(product.getId());
             cartItemDto.setImages(imageDtos);
             JSONParser parser = new JSONParser();
-            JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
+            JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(cartItem.getProductItem().getId());
             JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
-            JSONObject quantity = new JSONObject();
-            quantity.put("quantity_stock", productItem.getQuantityInStock());
-            quantity.put("quantity_sold", productItem.getQuantitySold());
-            quantity.put("productItem", productItem.getId());
-            productDetail.add(quantity);
+            JSONObject quantityObj = new JSONObject();
+            quantityObj.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
+            quantityObj.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
+            quantityObj.put("productItemId", cartItem.getProductItem().getId());
+            quantityObj.put("price", cartItem.getProductItem().getPrice());
+            productDetail.add(quantityObj);
+            cartItemDto.setProductItemDetail(productDetail);
+            cartItemDto.setProductName(product.getName());
+            // Lấy ra category
+            CategoryEntity category = product.getCategory();
+            CategoryDto categoryDto = new CategoryDto();
+            mapper.map(category, categoryDto);
+            categoryDto.setVariations(null);
+            cartItemDto.setCategory(categoryDto);
             cartItemDto.setProductItemDetail(productDetail);
             response.put("code", 1);
             response.put("message", "Thêm vào giỏ hàng thành công !!");
@@ -105,8 +114,8 @@ public class CartService implements ICartService {
         }
         catch (Exception e) {
             e.printStackTrace();
-            response.put("code", 1);
-            response.put("message", "Add item to cart success");
+            response.put("code", 0);
+            response.put("message", "Thêm mới vào giỏ hàng thất bại !!");
         }
         return response;
     }

@@ -72,6 +72,7 @@ public class ItemService implements IItemService {
             productItem.setPrice((float) 0);
             productItem.setQuantityInStock(0);
             productItem.setQuantitySold(0);
+            productItem.setDeleted(0);
             productItem = productItemRepository.save(productItem);
             List<ProductItemEntity> productItems = new ArrayList<>();
             productItems.add(productItem);
