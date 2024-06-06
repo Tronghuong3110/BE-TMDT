@@ -9,9 +9,11 @@ import java.util.List;
 public class CartItemDto {
     private Integer id;
     private Integer quantity;
-    private Double price; //
+    private Double totalPrice; //
     private Long productItemId;
     private Long productId;
     private List<ImageDto> images;
     private JSONArray productItemDetail;
+    private String productName;
+    private CategoryDto category;
 }

@@ -78,7 +78,7 @@ public class CartService implements ICartService {
             mapper.map(cartItem, cartItemDto);
             // Set giá
             Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
-            cartItemDto.setPrice(price);
+            cartItemDto.setTotalPrice(price);
             ProductEntity product = productRepository.findById(cartItem.getProductItem().getProduct().getId()).orElse(new ProductEntity());
             // Lấy ra danh sách ảnh
             List<ImageEntity> images = product.getImages();
@@ -127,7 +127,7 @@ public class CartService implements ICartService {
                 CartItemDto cartItemDto = new CartItemDto();
                 BeanUtils.copyProperties(cartItem, cartItemDto);
                 Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
-                cartItemDto.setPrice(price);
+                cartItemDto.setTotalPrice(price);
                 ProductEntity product = productRepository.findByIdAndDeleted(cartItem.getProductItem().getProduct().getId(), false).orElse(new ProductEntity());
                 // Lấy ra danh sách ảnh
                 List<ImageEntity> images = product.getImages();
@@ -146,9 +146,17 @@ public class CartService implements ICartService {
                 JSONObject quantity = new JSONObject();
                 quantity.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
                 quantity.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
-                quantity.put("productItem", cartItem.getProductItem().getId());
+                quantity.put("productItemId", cartItem.getProductItem().getId());
+                quantity.put("price", cartItem.getProductItem().getPrice());
                 productDetail.add(quantity);
                 cartItemDto.setProductItemDetail(productDetail);
+                cartItemDto.setProductName(product.getName());
+                // Lấy ra category
+                CategoryEntity category = product.getCategory();
+                CategoryDto categoryDto = new CategoryDto();
+                mapper.map(category, categoryDto);
+                categoryDto.setVariations(null);
+                cartItemDto.setCategory(categoryDto);
                 listResponse.add(cartItemDto);
             }
             return listResponse;
