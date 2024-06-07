@@ -19,5 +19,5 @@ public class OrderDto {
     private Date datePayment;
     private String statusOrder;
     private List<CartItemDto> cartItems;
-    private List<Integer> itemOrders;
+    private List<Integer> itemOrders; // danh sách id của cartItem
 }

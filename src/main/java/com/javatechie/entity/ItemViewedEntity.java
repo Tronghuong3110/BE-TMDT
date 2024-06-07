@@ -17,7 +17,7 @@ public class ItemViewedEntity {
     @Id
     private Long id;
     @Column(name = "item_id")
-    private Integer itemId;
+    private Long itemId;
     @Column(name = "user_id")
     private Integer userId;
     @Column(name = "viewed")

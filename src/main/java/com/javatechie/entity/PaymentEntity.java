@@ -3,6 +3,8 @@ package com.javatechie.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "payment")
 @Data
@@ -15,6 +17,6 @@ public class PaymentEntity {
     @Column(name = "description", columnDefinition = "longtext")
     private String description;
     private String code;
-    @OneToOne(mappedBy = "payment")
-    private OrderEntity order;
+    @OneToMany(mappedBy = "payment")
+    private List<OrderEntity> order;
 }

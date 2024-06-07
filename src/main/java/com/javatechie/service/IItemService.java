@@ -7,6 +7,8 @@ import com.javatechie.dto.VariationDto;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.util.List;
+
 public interface IItemService {
     JSONObject saveProduct(ProductDto productDto, CategoryDto categoryDto, Integer brandId);
     JSONObject updateProductDetail(Long productItemId, VariationDto variationDto);
@@ -15,4 +17,6 @@ public interface IItemService {
     JSONObject deleteProduct(Long productId);
     JSONObject updateProduct(ProductDto productDto, Integer brandId);
     JSONObject deleteItemDetail(Long productItemId);
+    JSONObject saveItemFavorite(Long id);
+    List<JSONObject> findAllItemFavoriteOrViewed(Integer favorite, Integer viewed);
 }

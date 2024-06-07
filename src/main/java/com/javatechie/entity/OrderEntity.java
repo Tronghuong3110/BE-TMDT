@@ -41,10 +41,10 @@ public class OrderEntity {
     private User user;
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<CartItemEntity> cartItems;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "payment_id")
     private PaymentEntity payment;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "shipment_id")
     private ShipmentEntity shipment;
     @OneToOne

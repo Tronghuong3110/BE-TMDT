@@ -1,5 +1,6 @@
 package com.javatechie.service.impl;
 
+import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
@@ -12,6 +13,8 @@ import org.json.simple.parser.ParseException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,7 +155,6 @@ public class ItemService implements IItemService {
     public JSONObject findOneById(Long productId, boolean isFindAll) {
         JSONObject response = new JSONObject();
         try {
-//            ProductItemEntity productItem = new ProductItemEntity();
             ProductEntity product = productRepository.findByIdAndDeleted(productId, false).orElse(null);
             if(product == null) {
                 response.put("message", "Sản phẩm không tồn tại");
@@ -182,9 +184,6 @@ public class ItemService implements IItemService {
                     reviews.add(reviewDto);
                 }
                 response.put("reviews", reviews);
-            }
-            // Lấy danh sách comment (danh cho lấy ra sản phẩm chi tiết)
-            if(!isFindAll) {
                 List<CommentEntity> commentEntities = product.getComments();
                 List<CommentDto> comments = new ArrayList<>();
                 for(CommentEntity comment : commentEntities) {
@@ -214,7 +213,6 @@ public class ItemService implements IItemService {
                 itemDetails.add(productDetail);
             }
             response.put("itemDetails", itemDetails);
-
             // Lấy thông tin category
             CategoryEntity category = product.getCategory();
             CategoryDto categoryDto = new CategoryDto();
@@ -233,6 +231,19 @@ public class ItemService implements IItemService {
             response.put("brand", brandDto);
             response.put("description", product.getDescription());
             response.put("code", 1);
+
+            // thêm mới vào danh sách item đã xem của user
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            Object authPrincipal = auth.getPrincipal();
+            if(!(authPrincipal.equals("anonymousUser"))) {
+                // TH đã đăng nhập
+                UserInfoUserDetails userDetails = (UserInfoUserDetails) authPrincipal;
+                User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+                ItemViewedEntity itemViewed = itemViewedRepository.findByItemIdAndUserId(product.getId(), user.getId()).orElse(
+                        new ItemViewedEntity(System.currentTimeMillis(), product.getId(), user.getId(), 1, 0));
+                itemViewed.setViewed(1);
+                itemViewedRepository.save(itemViewed);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -357,5 +368,51 @@ public class ItemService implements IItemService {
             response.put("message", "Xóa sản phẩm chi tiết thất bại !!");
         }
         return response;
+    }
+
+    // Thêm mới sản phẩm yêu thích
+    @Override
+    public JSONObject saveItemFavorite(Long id) {
+        JSONObject response = new JSONObject();
+        try {
+            ProductEntity item = productRepository.findByIdAndDeleted(id, false).orElse(new ProductEntity());
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserInfoUserDetails userDetails = (UserInfoUserDetails) auth.getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            ItemViewedEntity itemViewedEntity = new ItemViewedEntity(System.currentTimeMillis(), item.getId(), user.getId(), 0, 1);
+            itemViewedEntity = itemViewedRepository.save(itemViewedEntity);
+            response.put("code", 1);
+            response.put("message", "Thêm mới sản phẩm yêu thích thành công !!");
+            response.put("itemView", itemViewedEntity.getId());
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Thêm mới sản phẩm yêu thích thất bại !!");
+            response.put("itemView", null);
+        }
+        return response;
+    }
+
+    // lấy ra danh sách sản phẩm yêu thích hoặc sản phẩm đã xem
+    @Override
+    public List<JSONObject> findAllItemFavoriteOrViewed(Integer favorite, Integer viewed) {
+        try {
+            UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            List<ItemViewedEntity> listItemViewed = itemViewedRepository.findAllByFavoriteOrViewedAndUser(favorite, viewed, user.getId());
+            List<JSONObject> responses = new ArrayList<>();
+            for (ItemViewedEntity itemViewed : listItemViewed) {
+                ProductEntity item = productRepository.findByIdAndDeleted(itemViewed.getItemId(), false).orElse(null);
+                if(item == null) continue;
+                JSONObject itemDto = findOneById(item.getId(), true);
+                responses.add(itemDto);
+            }
+            return responses;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
