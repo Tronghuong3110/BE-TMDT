@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -118,6 +119,7 @@ public class OrderService implements IOrderService {
 
     // đặt hàng
     @Override
+    @Transactional
     public JSONObject saveOrder(OrderDto orderDto, Long shipmentMethod, Long paymentMethod, Long voucherId, String orderInfo, String responseCode, String transactionCode, String bankTranNo) {
         JSONObject response = new JSONObject();
         try {
@@ -126,7 +128,7 @@ public class OrderService implements IOrderService {
             PaymentEntity payment = paymentRepository.findById(paymentMethod).orElse(new PaymentEntity());
             String statusPayment;
             Date datePayment = null;
-            System.out.println("Code: " + payment.getCode());
+//            System.out.println("Code: " + payment.getCode());
             if(payment.getCode().equals("cash")) {
                 statusPayment = "Chưa thanh toán";
             }
@@ -140,19 +142,23 @@ public class OrderService implements IOrderService {
             UserVoucherEntity voucher = userVoucherRepository.findById(voucherId).orElse(null);
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
-
             OrderEntity order = new OrderEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), orderDto.getTotalPrice(),
                                                 null, statusPayment, orderDto.getAddress(), "Đã nhận đơn hàng", datePayment, orderInfo, bankTranNo, user,
                                                 null, payment, shipment, voucher);
             order = orderRepository.save(order);
             // lấy ra danh sách các item người dùng muốn đặt hàng
+//            JSONObject check
             for(Integer idCartItem : orderDto.getItemOrders()) {
                 CartItemEntity cartItem = cartItemRepository.findById(idCartItem).orElse(new CartItemEntity());
                 cartItem.setOrder(order);
                 cartItem.setOrdered(1);
-                cartItemRepository.save(cartItem);
                 ProductItemEntity itemDetail = cartItem.getProductItem();
-                itemDetail.setQuantitySold(cartItem.getQuantity());
+                itemDetail.setQuantitySold(cartItem.getQuantity() + itemDetail.getQuantitySold());
+                if(itemDetail.getQuantitySold() >= itemDetail.getQuantityInStock()) {
+//                    checkCanBuy = false;
+                    break;
+                }
+                cartItemRepository.save(cartItem);
                 productItemRepository.save(itemDetail);
             }
             if(voucher != null) {
