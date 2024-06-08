@@ -18,7 +18,7 @@ public class ProductItemEntity {
     private Long id;
     private Integer quantityInStock;
     private Integer quantitySold;
-    private Float price;
+    private Double price;
     private Integer deleted;
 
     @ManyToOne
@@ -33,12 +33,6 @@ public class ProductItemEntity {
     joinColumns = @JoinColumn(name = "product_item_id"),
     inverseJoinColumns = @JoinColumn(name = "promotion_id"))
     private List<PromotionEntity> promotions;
-
-    @ManyToMany
-    @JoinTable(name = "invoice_product",
-        joinColumns = @JoinColumn(name = "product_item_id"),
-        inverseJoinColumns = @JoinColumn(name = "invoice_id"))
-    private List<ItemInvoiceEntity> invoices;
 
     @OneToMany(mappedBy = "productItem")
     private List<ProductItemInvoiceEntity> productItemInvoices;

@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -94,5 +95,11 @@ public class ItemController {
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/api/item/import")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLOYEE')") // nhập hàng
+    public List<JSONObject> importItem(@RequestBody RequestImportItem request) {
+        return itemService.importItem(request.getProductItems(), request.getSupplierId());
     }
 }

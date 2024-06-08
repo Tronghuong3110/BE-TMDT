@@ -149,7 +149,7 @@ public class VariationService implements IVariationService {
             ProductItemEntity productItem = new ProductItemEntity();
             productItem.setId(System.currentTimeMillis());
             productItem.setProduct(product);
-            productItem.setPrice((float)0);
+            productItem.setPrice((double)0);
             productItem.setQuantitySold(0);
             productItem.setQuantityInStock(0);
             productItem = productItemRepository.save(productItem);

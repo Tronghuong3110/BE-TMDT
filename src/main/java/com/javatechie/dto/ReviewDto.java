@@ -14,4 +14,5 @@ public class ReviewDto {
     private Long id;
     private Integer ranking;
     private Date dateReview;
+    private String evaluate;
 }

@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,12 @@ public class ItemService implements IItemService {
     private ReviewRepository reviewRepository;
     @Autowired
     private BrandRepository brandRepository;
+    @Autowired
+    private SupplierRepository supplierRepository;
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+    @Autowired
+    private ProductItemInvoiceRepository productItemInvoiceRepository;
 
     @Override
     public JSONObject saveProduct(ProductDto productDto, CategoryDto categoryDto, Integer brandId) {
@@ -72,7 +79,7 @@ public class ItemService implements IItemService {
             ProductItemEntity productItem = new ProductItemEntity();
             productItem.setId(System.currentTimeMillis());
             productItem.setProduct(product);
-            productItem.setPrice((float) 0);
+            productItem.setPrice((double) 0);
             productItem.setQuantityInStock(0);
             productItem.setQuantitySold(0);
             productItem.setDeleted(0);
@@ -414,5 +421,41 @@ public class ItemService implements IItemService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<JSONObject> importItem(List<ProductItemDto> productItems, Long supplierId) {
+        JSONArray responses = new JSONArray();
+        try {
+            SupplierEntity supplier = supplierRepository.findByIdAndDeleted(supplierId, 0).orElse(null);
+            // tạo mới ra invoice và product_invoice
+            InvoiceEntity invoice = new InvoiceEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), null, supplier);
+            invoice = invoiceRepository.save(invoice);
+            // duyệt danh sách sản phẩm đang cần nhập
+            for(ProductItemDto productItemDto : productItems) {
+                JSONObject responseOneItem = new JSONObject();
+                ProductItemEntity productItem = productItemRepository.findByIdAndDeleted(productItemDto.getId(), 0).orElse(null);
+                if(productItem == null || supplier == null) {
+                    responseOneItem.put("code", 0);
+                    responseOneItem.put("message", "Không tồn tại sản phẩm có id: " + productItemDto.getId() + " hoặc không tồn tại nhà cung cấp có id: " + productItemDto.getSupplierId());
+                    responses.add(responseOneItem);
+                    continue;
+                }
+                // Cập nhật số lượng và giá bán của sản phẩm
+                productItem.setQuantityInStock(productItem.getQuantityInStock() + productItemDto.getImportQuantity());
+                productItem.setPrice(productItemDto.getImportPrice());
+                productItem = productItemRepository.save(productItem);
+                // tạo mới product_item_invoice
+                ProductItemInvoiceEntity productItemInvoice = new ProductItemInvoiceEntity(System.currentTimeMillis(), productItemDto.getImportPrice(), productItemDto.getSoldPrice(), productItemDto.getImportQuantity(), invoice, productItem);
+                productItemInvoice = productItemInvoiceRepository.save(productItemInvoice);
+                responseOneItem.put("code", 1);
+                responseOneItem.put("message", "Nhập sản phẩm có id: " + productItemDto.getId() + " thành công !!");
+                responses.add(responseOneItem);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return responses;
     }
 }

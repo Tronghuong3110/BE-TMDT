@@ -1,6 +1,8 @@
 package com.javatechie.dto;
 
 import lombok.Data;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.sql.Date;
 
@@ -12,5 +14,5 @@ public class ProductItemInvoiceDto {
     private Double cost;
     private Double price;
     private Integer quantity;
-    private ProductItemDto product;
+    private JSONArray product;
 }

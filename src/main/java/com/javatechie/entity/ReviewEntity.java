@@ -20,6 +20,8 @@ public class ReviewEntity {
     private Integer ranking;
     @Column(name = "date_review")
     private Date dateReview;
+    @Column(name = "evaluate", columnDefinition = "longtext")
+    private String evaluate;
 
     @ManyToOne
     @JoinColumn(name = "product_id")

@@ -10,6 +10,6 @@ public class InvoiceDto {
     private Long id;
     private Date createDate;
     private SupplierDto supplier;
-    private List<ProductItemInvoiceDto> products;
+    private List<ProductItemInvoiceDto> productItemInvoices;
     private Double totalPrice;
 }

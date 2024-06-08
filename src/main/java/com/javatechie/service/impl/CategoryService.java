@@ -4,7 +4,9 @@ import com.javatechie.dto.CategoryDto;
 import com.javatechie.entity.CategoryEntity;
 import com.javatechie.repository.CategoryRepository;
 import com.javatechie.service.ICategoryService;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,9 +52,11 @@ public class CategoryService implements ICategoryService {
         try {
             List<CategoryEntity> categories = categoryRepository.findAll();
             List<CategoryDto> listResponse = new ArrayList<>();
+            ModelMapper mapper = MapperUtil.configModelMapper();
             for(CategoryEntity categoryEntity : categories) {
                 CategoryDto categoryDto = new CategoryDto();
-                BeanUtils.copyProperties(categoryEntity, categoryDto);
+                mapper.map(categoryEntity, categoryDto);
+                categoryDto = setVariationOptionIsNull(categoryDto);
                 listResponse.add(categoryDto);
             }
             return listResponse;
@@ -66,6 +70,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public JSONObject findOneById(Integer id) {
         JSONObject response = new JSONObject();
+        ModelMapper mapper = MapperUtil.configModelMapper();
         try {
             CategoryEntity categoryEntity = categoryRepository.findByIdAndDeleted(id, 0).orElse(null);
             if(categoryEntity == null) {
@@ -74,7 +79,8 @@ public class CategoryService implements ICategoryService {
                 return response;
             }
             CategoryDto categoryDto = new CategoryDto();
-            BeanUtils.copyProperties(categoryEntity, categoryDto);
+            mapper.map(categoryEntity, categoryDto);
+            categoryDto = setVariationOptionIsNull(categoryDto);
             response.put("code", 1);
             response.put("message", categoryDto);
         }
@@ -144,5 +150,9 @@ public class CategoryService implements ICategoryService {
             e.printStackTrace();
             return null;
         }
+    }
+    private CategoryDto setVariationOptionIsNull(CategoryDto categoryDto) {
+        categoryDto.getVariations().forEach(variation -> {variation.setVariationOptions(null);});
+        return categoryDto;
     }
 }

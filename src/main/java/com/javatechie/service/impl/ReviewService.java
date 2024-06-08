@@ -52,7 +52,7 @@ public class ReviewService implements IReviewService {
                 response.put("message", "Bạn đã hết lượt ánh giá cho sản phẩm này !!");
                 return response;
             }
-            ReviewEntity review = new ReviewEntity(System.currentTimeMillis(), reviewDto.getRanking(), new Date(System.currentTimeMillis()), product, user);
+            ReviewEntity review = new ReviewEntity(System.currentTimeMillis(), reviewDto.getRanking(), new Date(System.currentTimeMillis()), reviewDto.getEvaluate(), product, user);
             review = reviewRepository.save(review);
             BeanUtils.copyProperties(review, reviewDto);
             response.put("code", 1);
