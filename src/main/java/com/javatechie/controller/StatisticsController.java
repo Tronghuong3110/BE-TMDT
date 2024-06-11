@@ -5,6 +5,7 @@ import com.squareup.okhttp.Response;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
@@ -24,8 +25,8 @@ public class StatisticsController {
     - Doanh thu/Lợi nhuận/ Chi phí trong năm (12 tháng) , theo quý (4 quý)
     * */
     @PostMapping("/statistic/month")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLOYEE')")
     public ResponseEntity<?> statisticByMonth(@RequestBody JSONObject request) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         Date start = Date.valueOf(request.get("start").toString());
         Date end = Date.valueOf(request.get("end").toString());
         JSONObject response = statisticService.statisticProductSold(start, end);
@@ -33,5 +34,11 @@ public class StatisticsController {
             return ResponseEntity.badRequest().body("Lấy thống kê lỗi rồi !!");
         }
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/statistic/top/product")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLOYEE')")
+    public List<JSONObject> findTopProductBestSeller() {
+        return statisticService.findAllTopProductBestSeller();
     }
 }

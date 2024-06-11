@@ -446,7 +446,7 @@ public class ItemService implements IItemService {
                 productItem.setPrice(productItemDto.getImportPrice());
                 productItem = productItemRepository.save(productItem);
                 // tạo mới product_item_invoice
-                ProductItemInvoiceEntity productItemInvoice = new ProductItemInvoiceEntity(System.currentTimeMillis(), productItemDto.getImportPrice(), productItemDto.getSoldPrice(), productItemDto.getImportQuantity(), invoice, productItem);
+                ProductItemInvoiceEntity productItemInvoice = new ProductItemInvoiceEntity(System.currentTimeMillis(), productItemDto.getImportPrice(), productItemDto.getSoldPrice(), productItemDto.getImportQuantity(), new Date(System.currentTimeMillis()), invoice, productItem);
                 productItemInvoice = productItemInvoiceRepository.save(productItemInvoice);
                 responseOneItem.put("code", 1);
                 responseOneItem.put("message", "Nhập sản phẩm có id: " + productItemDto.getId() + " thành công !!");

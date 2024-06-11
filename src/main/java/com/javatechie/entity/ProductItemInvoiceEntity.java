@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
+import java.util.Date;
 
 @Data
 @Entity
@@ -19,6 +19,7 @@ public class ProductItemInvoiceEntity {
     private Double cost;
     private Double price;
     private Integer quantity;
+    private Date importDate;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
