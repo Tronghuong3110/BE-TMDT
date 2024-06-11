@@ -7,7 +7,9 @@ import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IOrderService;
 import com.javatechie.util.MapperUtil;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,8 @@ public class OrderService implements IOrderService {
     private UserInfoRepository userInfoRepository;
     @Autowired
     private ProductItemRepository productItemRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     // lấy ra danh sách đơn hàng đã đặt (dành cho người dùng và admin)
     @Override
@@ -82,34 +86,46 @@ public class OrderService implements IOrderService {
     @Override
     public List<CartItemDto> getListItemOfOrder(Long orderId) {
         try {
-//            OrderEntity order = orderRepository.findById(orderId).orElse(new OrderEntity());
-//            List<CartItemEntity> listCartItem = order.getCartItems();
+            OrderEntity order = orderRepository.findById(orderId).orElse(new OrderEntity());
+            List<CartItemEntity> listCartItem = order.getCartItems();
             List<CartItemDto> listResponse = new ArrayList<>();
-//            for(CartItemEntity cartItem : listCartItem) {
-//                CartItemDto cartItemDto = new CartItemDto();
-//                ModelMapper mapper = MapperUtil.configModelMapper();
-//                mapper.map(cartItem, cartItemDto);
-//                Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
-//                cartItemDto.setPrice(price);
-//
-//                ProductItemDto itemDto = new ProductItemDto();
-//                ProductEntity item = cartItem.getProductItem().getProduct();
-//                mapper.map(item, itemDto);
-//                itemDto.set(null);
-//                CategoryEntity category = item.getCategory();
-//                CategoryDto categoryDto = new CategoryDto();
-//                mapper.map(category, categoryDto);
-//                categoryDto.setItems(null);
-//                itemDto.setCategoryDto(categoryDto);
-//                cartItemDto.setItemDto(itemDto);
-//
-//                ItemDetailDto itemDetailDto = new ItemDetailDto();
-//                BeanUtils.copyProperties(cartItem.getItem(), itemDetailDto);
-//                cartItemDto.setItemDetail(itemDetailDto);
-//
-//                listResponse.add(cartItemDto);
-                return listResponse;
-//            }
+            for(CartItemEntity cartItem : listCartItem) {
+                CartItemDto cartItemDto = new CartItemDto();
+                BeanUtils.copyProperties(cartItem, cartItemDto);
+                Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
+                cartItemDto.setTotalPrice(price);
+                ProductEntity product = productRepository.findByIdAndDeleted(cartItem.getProductItem().getProduct().getId(), false).orElse(new ProductEntity());
+                // Lấy ra danh sách ảnh
+                List<ImageEntity> images = product.getImages();
+                List<ImageDto> imageDtos = new ArrayList<>();
+                ModelMapper mapper = MapperUtil.configModelMapper();
+                for(ImageEntity image : images) {
+                    ImageDto imageDto = new ImageDto();
+                    mapper.map(image, imageDto);
+                    imageDtos.add(imageDto);
+                }
+                cartItemDto.setProductId(product.getId());
+                cartItemDto.setImages(imageDtos);
+                JSONParser parser = new JSONParser();
+                JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(cartItem.getProductItem().getId());
+                JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                JSONObject quantity = new JSONObject();
+                quantity.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
+                quantity.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
+                quantity.put("productItemId", cartItem.getProductItem().getId());
+                quantity.put("price", cartItem.getProductItem().getPrice());
+                productDetail.add(quantity);
+                cartItemDto.setProductItemDetail(productDetail);
+                cartItemDto.setProductName(product.getName());
+                // Lấy ra category
+                CategoryEntity category = product.getCategory();
+                CategoryDto categoryDto = new CategoryDto();
+                mapper.map(category, categoryDto);
+                categoryDto.setVariations(null);
+                cartItemDto.setCategory(categoryDto);
+                listResponse.add(cartItemDto);
+            }
+            return listResponse;
         }
         catch (Exception e) {
             e.printStackTrace();
