@@ -84,21 +84,22 @@ public class OrderService implements IOrderService {
 
     // lấy ra danh sách các sản phẩm của 1 đơn hàng
     @Override
-    public List<CartItemDto> getListItemOfOrder(Long orderId) {
+    public JSONObject getListItemOfOrder(Long orderId) {
         try {
+            JSONObject response = new JSONObject();
             OrderEntity order = orderRepository.findById(orderId).orElse(new OrderEntity());
             List<CartItemEntity> listCartItem = order.getCartItems();
             List<CartItemDto> listResponse = new ArrayList<>();
+            ModelMapper mapper = MapperUtil.configModelMapper();
             for(CartItemEntity cartItem : listCartItem) {
                 CartItemDto cartItemDto = new CartItemDto();
-                BeanUtils.copyProperties(cartItem, cartItemDto);
+                mapper.map(cartItem, cartItemDto);
                 Double price = Math.round(cartItem.getProductItem().getPrice() * cartItem.getQuantity() * 100.0) / 100.0;
                 cartItemDto.setTotalPrice(price);
                 ProductEntity product = productRepository.findByIdAndDeleted(cartItem.getProductItem().getProduct().getId(), false).orElse(new ProductEntity());
                 // Lấy ra danh sách ảnh
                 List<ImageEntity> images = product.getImages();
                 List<ImageDto> imageDtos = new ArrayList<>();
-                ModelMapper mapper = MapperUtil.configModelMapper();
                 for(ImageEntity image : images) {
                     ImageDto imageDto = new ImageDto();
                     mapper.map(image, imageDto);
@@ -125,7 +126,21 @@ public class OrderService implements IOrderService {
                 cartItemDto.setCategory(categoryDto);
                 listResponse.add(cartItemDto);
             }
-            return listResponse;
+            response.put("listItem", listResponse);
+
+            // lấy thông tin người mua hàng
+            User user = userInfoRepository.findByIdAndDeleted(order.getUser().getId(), 0).orElse(null);
+            UserDto userDto = new UserDto();
+            mapper.map(user, userDto);
+            userDto.setPassword(null);
+            userDto.setRoles(null);
+            response.put("infoUser", userDto);
+
+            OrderDto orderDto = new OrderDto();
+            mapper.map(order, orderDto);
+            orderDto.setCartItems(null);
+            response.put("infoOrder", orderDto);
+            return response;
         }
         catch (Exception e) {
             e.printStackTrace();

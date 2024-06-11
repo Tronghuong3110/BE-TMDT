@@ -26,7 +26,7 @@ public class OrderController {
     }
 
     @GetMapping("/order")
-    public List<CartItemDto> findAllItemOfOrder(@RequestParam("orderId")long orderId) {
+    public JSONObject findAllItemOfOrder(@RequestParam("orderId")long orderId) {
         return orderService.getListItemOfOrder(orderId);
     }
 
