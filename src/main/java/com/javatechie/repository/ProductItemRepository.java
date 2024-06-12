@@ -37,4 +37,8 @@ public interface ProductItemRepository extends JpaRepository<ProductItemEntity, 
     @Query(value = "select id from product_item where product_id = :productId and deleted = 0", nativeQuery = true)
     List<Long> findAllByProduct_id(@Param("productId") Long productId);
     Optional<ProductItemEntity> findByIdAndDeleted(Long id, Integer deleted);
+
+    @Query(value = "delete pp from product_promotion pp join product p on p.id = pp.product_item_id " +
+                    "where pp.promotion_id = :promotionId ", nativeQuery = true)
+    void deleteProductItemPromotion(@Param("promotionId") Integer promotionId);
 }

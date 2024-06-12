@@ -300,7 +300,7 @@ public class OrderService implements IOrderService {
                     response.put("message", "Đơn hàng của bạn đang được vận chuyển không thể hủy đơn hàng !!");
                     return response;
                 }
-                if (timeCancel >= 3600000*1000) {
+                if (timeCancel >= 24*3600*1000) {
                     response.put("code", 0);
                     response.put("message", "Đơn hàng của bạn đã quá thời gian hủy đơn !!");
                     return response;
@@ -314,6 +314,11 @@ public class OrderService implements IOrderService {
             }
             // TH người phụ trách đơn hàng cập nhật xác nhận đơn hàng
             else {
+                if(order.getStatusOrderInt() == 4) {
+                    response.put("code", 0);
+                    response.put("message", "Đơn hàng đã bị hủy, không thể thực hiện giao hàng !!");
+                    return response;
+                }
                 String statusStr = convertStatusIntToStatusStr(status);
                 order.setStatusOrder(statusStr);
                 order.setStatusOrderInt(status);

@@ -1,6 +1,8 @@
 package com.javatechie.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
+import org.json.simple.JSONObject;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -16,6 +18,6 @@ public class PromotionDto {
     private Integer deleted;
     private String pathImage;
     private List<Long> idItems; // sản phẩm chi tiết
-    private List<Integer> idItemsRemove;
-    private List<ProductItemDto> products;
+    private List<Long> idItemsRemove;
+    private List<JSONObject> products;
 }
