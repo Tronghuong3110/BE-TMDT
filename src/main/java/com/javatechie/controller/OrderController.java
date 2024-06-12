@@ -57,4 +57,15 @@ public class OrderController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/order")
+    public ResponseEntity<?> updateOrder(@RequestParam("status") Optional<Integer> status,
+                                         @RequestParam("cancel") Optional<Integer> cancel,
+                                         @RequestParam("orderId") Long orderId) {
+        JSONObject response = orderService.updateOrder(status.orElse(0), cancel.orElse(null), orderId);
+        if (response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 }

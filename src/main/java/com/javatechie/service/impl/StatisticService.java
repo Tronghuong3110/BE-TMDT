@@ -31,12 +31,12 @@ public class StatisticService implements IStatisticService {
     public List<JSONObject> findAllTopProductBestSeller() {
         try {
             List<JSONObject> responses = new ArrayList<>();
-            JSONObject topProduct = cartItemRepository.statisticTopProduct();
-//            for(Object obj : topProduct) {
-//                JSONObject tmp = (JSONObject) obj;
-//                JSONObject product = (JSONObject) tmp.get("product_info");
-//                responses.add(product);
-//            }
+            List<JSONObject> topProduct = cartItemRepository.statisticTopProduct();
+            JSONParser parser = new JSONParser();
+            for(JSONObject obj : topProduct) {
+                JSONObject product = (JSONObject) parser.parse(obj.get("product_info").toString());
+                responses.add(product);
+            }
             return responses;
         }
         catch (Exception e) {
@@ -51,7 +51,7 @@ public class StatisticService implements IStatisticService {
             JSONObject response = new JSONObject();
             // Lấy số lượng đã bán
             // từ danh sách order ==> số lượng sản phẩm đã bán được
-            List<OrderEntity> orders = orderRepository.findAllByCreateDateBetween(start, end);
+            List<OrderEntity> orders = orderRepository.findAllByCreateDateBetweenAndStatus(start, end);
             // tổng số lượng bán được
             long quantitySold = orders.stream()
                                 .flatMap(orderEntity -> orderEntity.getCartItems().stream())

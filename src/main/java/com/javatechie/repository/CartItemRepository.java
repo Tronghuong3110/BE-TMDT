@@ -27,5 +27,5 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, Intege
             ") AS subquery\n" +
             "JOIN product ON subquery.id = product.id\n" +
             "GROUP BY product.id", nativeQuery = true)
-    JSONObject statisticTopProduct();
+    List<JSONObject> statisticTopProduct();
 }

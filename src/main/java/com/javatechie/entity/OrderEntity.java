@@ -36,6 +36,9 @@ public class OrderEntity {
     private String description;
     @Column(name = "bank_tran_no")
     private String bankTranNo;
+    @Column(name = "status_order_int")
+    private Integer statusOrderInt;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

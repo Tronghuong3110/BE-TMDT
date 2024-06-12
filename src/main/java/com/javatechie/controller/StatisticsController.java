@@ -30,9 +30,9 @@ public class StatisticsController {
         Date start = Date.valueOf(request.get("start").toString());
         Date end = Date.valueOf(request.get("end").toString());
         JSONObject response = statisticService.statisticProductSold(start, end);
-        if(response.get("code").equals(0)) {
-            return ResponseEntity.badRequest().body("Lấy thống kê lỗi rồi !!");
-        }
+//        if(response.get("code").equals(0)) {
+//            return ResponseEntity.badRequest().body("Lấy thống kê lỗi rồi !!");
+//        }
         return ResponseEntity.ok(response);
     }
 

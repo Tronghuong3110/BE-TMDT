@@ -15,7 +15,7 @@ public class PromotionDto {
     private Integer discount; // giảm bao nhiêu %
     private Integer deleted;
     private String pathImage;
-    private List<Long> idItems;
+    private List<Long> idItems; // sản phẩm chi tiết
     private List<Integer> idItemsRemove;
-    private List<ProductDto> products;
+    private List<ProductItemDto> products;
 }

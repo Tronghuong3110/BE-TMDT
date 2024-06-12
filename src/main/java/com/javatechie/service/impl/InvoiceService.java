@@ -37,7 +37,7 @@ public class InvoiceService implements IInvoiceService {
             else {
                 listInvoice = invoiceRepository.findAllByCreateDateBetween(start, end);
             }
-            ModelMapper mapper = new ModelMapper();
+            ModelMapper mapper = MapperUtil.configModelMapper();
             for(InvoiceEntity invoice : listInvoice) {
                 InvoiceDto invoiceDto = new InvoiceDto();
                 mapper.map(invoice, invoiceDto);

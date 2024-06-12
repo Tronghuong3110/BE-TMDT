@@ -12,4 +12,5 @@ public interface IOrderService {
     JSONObject getListItemOfOrder(Long orderId);
     JSONObject saveOrder(OrderDto orderDto, Long shipmentMethod, Long paymentMethod, Long voucherId, String orderInfo, String responseCode, String transactionCode, String bankTranNo);
     JSONObject paymentOnline(OrderDto order);
+    JSONObject updateOrder(Integer status, Integer cancel, Long orderId);
 }

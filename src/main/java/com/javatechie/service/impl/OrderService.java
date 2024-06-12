@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -173,12 +174,12 @@ public class OrderService implements IOrderService {
             UserVoucherEntity voucher = userVoucherRepository.findById(voucherId).orElse(null);
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+            String statusStr = convertStatusIntToStatusStr(0);
             OrderEntity order = new OrderEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), orderDto.getTotalPrice(),
-                                                null, statusPayment, orderDto.getAddress(), "Đã nhận đơn hàng", datePayment, orderInfo, bankTranNo, user,
-                                                null, payment, shipment, voucher);
+                                null, statusPayment, orderDto.getAddress(), statusStr, datePayment, orderInfo, bankTranNo, 0, user,
+                                null, payment, shipment, voucher);
             order = orderRepository.save(order);
             // lấy ra danh sách các item người dùng muốn đặt hàng
-//            JSONObject check
             for(Integer idCartItem : orderDto.getItemOrders()) {
                 CartItemEntity cartItem = cartItemRepository.findById(idCartItem).orElse(new CartItemEntity());
                 cartItem.setOrder(order);
@@ -186,7 +187,6 @@ public class OrderService implements IOrderService {
                 ProductItemEntity itemDetail = cartItem.getProductItem();
                 itemDetail.setQuantitySold(cartItem.getQuantity() + itemDetail.getQuantitySold());
                 if(itemDetail.getQuantitySold() >= itemDetail.getQuantityInStock()) {
-//                    checkCanBuy = false;
                     break;
                 }
                 cartItemRepository.save(cartItem);
@@ -282,5 +282,67 @@ public class OrderService implements IOrderService {
             response.put("url", "");
         }
         return response;
+    }
+
+    @Override
+    public JSONObject updateOrder(Integer status, Integer cancel, Long orderId) {
+        JSONObject response = new JSONObject();
+        try {
+            OrderEntity order = orderRepository.findById(orderId).orElse(new OrderEntity());
+            // TH hủy đơn hàng
+            if(cancel != null) {
+                Date currentDate = new Date(System.currentTimeMillis());
+                Date createOrder = order.getCreateDate();
+                long timeCancel = currentDate.getTime() - createOrder.getTime();
+                int statusOrder = order.getStatusOrderInt();
+                if(statusOrder == 2 || statusOrder == 3) {
+                    response.put("code", 0);
+                    response.put("message", "Đơn hàng của bạn đang được vận chuyển không thể hủy đơn hàng !!");
+                    return response;
+                }
+                if (timeCancel >= 3600000*1000) {
+                    response.put("code", 0);
+                    response.put("message", "Đơn hàng của bạn đã quá thời gian hủy đơn !!");
+                    return response;
+                }
+                String statusStr = convertStatusIntToStatusStr(4);
+                order.setStatusOrderInt(4);
+                order.setStatusOrder(statusStr);
+                // Gửi thông báo broker tới người phụ trách đơn hàng
+                // lưu vào thông báo
+                orderRepository.save(order);
+            }
+            // TH người phụ trách đơn hàng cập nhật xác nhận đơn hàng
+            else {
+                String statusStr = convertStatusIntToStatusStr(status);
+                order.setStatusOrder(statusStr);
+                order.setStatusOrderInt(status);
+                orderRepository.save(order);
+            }
+            response.put("code", 1);
+            response.put("message", "Cập nhật đơn hàng thành công !!");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Cập nhật đơn hàng thất bại !!");
+        }
+        return response;
+    }
+
+    private String convertStatusIntToStatusStr(Integer status) {
+        switch(status) {
+            case 0:
+                return "Đang xử lý";
+            case 1:
+                return "Đã nhận đơn";
+            case 2:
+                return "Đang vận chuyển";
+            case 3:
+                return "Đã nhận hàng";
+            case 4:
+                return "Đã hủy đơn";
+        }
+        return null;
     }
 }
