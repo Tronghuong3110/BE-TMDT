@@ -30,15 +30,17 @@ public class StatisticsController {
         Date start = Date.valueOf(request.get("start").toString());
         Date end = Date.valueOf(request.get("end").toString());
         JSONObject response = statisticService.statisticProductSold(start, end);
-//        if(response.get("code").equals(0)) {
-//            return ResponseEntity.badRequest().body("Lấy thống kê lỗi rồi !!");
-//        }
         return ResponseEntity.ok(response);
     }
-
     @GetMapping("/statistic/top/product")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLOYEE')")
     public List<JSONObject> findTopProductBestSeller() {
         return statisticService.findAllTopProductBestSeller();
+    }
+
+    @GetMapping("statistic/year")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<?> statisticByYear(@RequestParam("year") Integer year) {
+        return null;
     }
 }

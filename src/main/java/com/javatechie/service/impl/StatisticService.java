@@ -57,12 +57,12 @@ public class StatisticService implements IStatisticService {
                                 .flatMap(orderEntity -> orderEntity.getCartItems().stream())
                                 .mapToLong(CartItemEntity :: getQuantity)
                                 .sum();
-            // Tổng tiền bán được
+            // Tổng tiền bán được (doanh thu)
             long totalPrice = orders.stream().mapToLong(OrderEntity::getTotalPrice).sum();
-            // tính tổng tiền hàng nhập được trong tháng
+            // tính tổng tiền hàng nhập được trong tháng (chi phí)
             List<ProductItemInvoiceEntity> invoices = productItemInvoiceRepository.findAllByImportDateBetween(start, end);
             long cost = invoices.stream().mapToLong(invoice ->(long)(invoice.getCost() * invoice.getQuantity())).sum();
-            long profit = totalPrice - cost;
+            long profit = totalPrice - cost; // lợi nhuận
             response.put("cost", cost);
             response.put("profit", profit);
             response.put("totalPrice", totalPrice);
@@ -72,6 +72,11 @@ public class StatisticService implements IStatisticService {
         catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    @Override
+    public JSONObject statisticProductSoldByYear(Integer year) {
         return null;
     }
 }

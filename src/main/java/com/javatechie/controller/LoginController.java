@@ -2,6 +2,7 @@ package com.javatechie.controller;
 
 import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.UserDto;
+import com.javatechie.service.IUserService;
 import com.javatechie.service.impl.JwtService;
 import com.javatechie.service.impl.UserService;
 import org.json.simple.JSONObject;
@@ -22,7 +23,7 @@ public class LoginController {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private UserService userService;
+    private IUserService userService;
 
     // đăng nhập
     @PostMapping("/login")

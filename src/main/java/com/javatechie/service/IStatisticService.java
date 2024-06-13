@@ -9,4 +9,5 @@ public interface IStatisticService {
 
     List<JSONObject> findAllTopProductBestSeller();
     JSONObject statisticProductSold(Date start, Date end);
+    JSONObject statisticProductSoldByYear(Integer year);
 }

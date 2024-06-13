@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class PromotionDto {
     private Integer id;
-    private String content;
+    private String name;
     private Date dateStart;
     private Date dateEnd;
     private Integer discount; // giảm bao nhiêu %

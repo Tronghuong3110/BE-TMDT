@@ -12,4 +12,5 @@ public interface IUserService {
     JSONObject getInfoOfUser();
     JSONObject updateUser(UserDto userDto);
     JSONObject deleteUser(Integer id);
+    List<Long> findAllProductBought(Integer userId);
 }

@@ -58,7 +58,6 @@ public class UserService implements IUserService {
             userEntity.setCreateDate(new Date(System.currentTimeMillis()));
             userEntity.setDeleted(0);
             userEntity = userInfoRepository.save(userEntity);
-            BeanUtils.copyProperties(userEntity, user);
             if(userEntity.getRoles().contains("ADMIN") || userEntity.getRoles().contains("EMPLOYEE")) {
                 // thêm mới topic vào db
                 String topic = "buy";
@@ -73,6 +72,7 @@ public class UserService implements IUserService {
                 // thêm mới role cho user để đăng ký subcribe và publish với chính topic của user
                 String responseAddRole = ApiAddInfoToBroker.addRuleToBroker(user.getUsername(), topic);
             }
+            BeanUtils.copyProperties(userEntity, user);
             response.put("code", 1);
             response.put("message", "Đăng ký tài khoản thành công !!");
             response.put("user", user);
@@ -227,6 +227,12 @@ public class UserService implements IUserService {
             response.put("message", "Xóa tài khoản thất bại !!");
         }
         return response;
+    }
+
+    @Override
+    public List<Long> findAllProductBought(Integer userId) {
+
+        return null;
     }
 
 
