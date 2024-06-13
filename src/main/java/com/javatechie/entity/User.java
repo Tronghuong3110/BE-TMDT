@@ -45,8 +45,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<ReviewEntity> reviews;
     @OneToMany(mappedBy = "user")
-    private List<NotificationEntity> notifies;
-    @OneToMany(mappedBy = "user")
     private List<UserVoucherEntity> userVouchers;
     @OneToMany(mappedBy = "user")
     private List<UserAddressEntity> userAddresses;

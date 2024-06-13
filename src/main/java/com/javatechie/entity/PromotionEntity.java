@@ -27,9 +27,6 @@ public class PromotionEntity {
     @Column(name = "deleted")
     private Integer deleted;
 
-    @OneToMany(mappedBy = "promotion")
-    private List<NotificationEntity> notifications;
-
     @ManyToMany(mappedBy = "promotions")
     private List<ProductItemEntity> productItems;
 }
