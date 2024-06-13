@@ -101,7 +101,7 @@ public class PromotionService implements IPromotionService {
                 mapper.map(promotion, promotionDto);
                 List<JSONObject> listProduct = new ArrayList<>();
                 for(ProductItemEntity productItem : promotion.getProductItems()) {
-                    JSONObject product = itemService.findOneById(productItem.getId(), true);
+                    JSONObject product = itemService.findOneById(productItem.getProduct().getId(), true);
                     listProduct.add(product);
                 }
                 promotionDto.setProducts(listProduct);
@@ -130,7 +130,7 @@ public class PromotionService implements IPromotionService {
             mapper.map(promotion, promotionDto);
             List<JSONObject> listProduct = new ArrayList<>();
             for(ProductItemEntity productItem : promotion.getProductItems()) {
-                JSONObject product = itemService.findOneById(productItem.getId(), true);
+                JSONObject product = itemService.findOneById(productItem.getProduct().getId(), true);
                 listProduct.add(product);
             }
             promotionDto.setProducts(listProduct);
