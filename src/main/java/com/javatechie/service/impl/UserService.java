@@ -7,7 +7,9 @@ import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.service.IUserService;
 import com.javatechie.util.CheckPassWord;
 import com.javatechie.util.ConstUtil;
+import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -155,28 +157,32 @@ public class UserService implements IUserService {
             }
             if(user == null) {
                 response.put("code", 0);
-                response.put("message", "Can not change information of user");
-                return response;
-            }
-            user = convertFromDtoToEntity(userDto, user);
-            if(user == null) {
-                response.put("code", 0);
-                response.put("message", "Can not change information");
+                response.put("message", "Không thể thay đổi thông tin của user !!");
                 return response;
             }
             // TH thay đổi password ==> check lại điều kiện password
             if (userDto.getPassword() != null) {
-                Boolean checkPassword = CheckPassWord.isStrongPassword(userDto.getPassword());
+                boolean checkPassword = CheckPassWord.isStrongPassword(userDto.getPassword());
                 if(!checkPassword) {
                     response.put("code", 0);
-                    response.put("message", "Password invalidate");
+                    response.put("message", "Mật khẩu không hợp lệ !!");
                     return response;
                 }
+                // kiểm tra mật khẩu cũ nhập vào có giống với mật khẩu hiện tại không
+                if(!passwordEncoder.matches(userDto.getPasswordOld(), user.getPassword())) {
+                    response.put("code", 0);
+                    response.put("message", "Mật khẩu không đúng !!");
+                    return response;
+                }
+                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            }
+            else {
+                user = convertFromDtoToEntity(userDto, user);
             }
             user.setModifiedDate(new Date(System.currentTimeMillis()));
             userInfoRepository.save(user);
             response.put("code", 1);
-            response.put("message", "Change information success");
+            response.put("message", "Thay đổi thông tin thành công !!");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -193,18 +199,18 @@ public class UserService implements IUserService {
             User user = userInfoRepository.findByIdAndDeleted(id, 0).orElse(null);
             if(user == null) {
                 response.put("code", 0);
-                response.put("message", "Can not found user with id = " + id);
+                response.put("message", "Không tìm thấy người dùng có id = " + id);
                 return response;
             }
             user.setDeleted(1);
             userInfoRepository.save(user);
             response.put("code", 1);
-            response.put("message", "Delete account user success");
+            response.put("message", "Xóa tài khoản thành công !!");
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Delete account user fail");
+            response.put("message", "Xóa tài khoản thất bại !!");
         }
         return response;
     }
@@ -231,10 +237,8 @@ public class UserService implements IUserService {
 
     private User convertFromDtoToEntity(UserDto userDto, User user) {
         try {
-            BeanUtils.copyProperties(userDto, user);
-            if(userDto.getPassword() != null) {
-                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-            }
+            ModelMapper mapper = MapperUtil.configModelMapper();
+            mapper.map(userDto, user);
             return user;
         }
         catch (Exception e) {

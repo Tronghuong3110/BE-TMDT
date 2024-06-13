@@ -37,14 +37,29 @@ public class InvoiceService implements IInvoiceService {
             else {
                 listInvoice = invoiceRepository.findAllByCreateDateBetween(start, end);
             }
+            List<ProductItemInvoiceDto> listProductItemInvoices = new ArrayList<>();
             ModelMapper mapper = MapperUtil.configModelMapper();
             for(InvoiceEntity invoice : listInvoice) {
                 InvoiceDto invoiceDto = new InvoiceDto();
                 mapper.map(invoice, invoiceDto);
                 double totalCost = 0;
                 for(ProductItemInvoiceEntity productItemInvoice : invoice.getProductItemInvoices()) {
-                    totalCost += productItemInvoice.getCost();
+                    totalCost += productItemInvoice.getCost() * productItemInvoice.getQuantity();
+                    ProductItemInvoiceDto product = new ProductItemInvoiceDto();
+                    mapper.map(productItemInvoice, product);
+                    // Lấy ra thông tin sản phẩm
+                    JSONParser parser = new JSONParser();
+                    JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItemInvoice.getProductItem().getId());
+                    if(object != null) {
+                        JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                        JSONObject nameProduct = new JSONObject();
+                        nameProduct.put("nameProduct", productItemInvoice.getProductItem().getProduct().getName());
+                        productDetail.add(nameProduct);
+                        product.setProduct(productDetail);
+                    }
+                    listProductItemInvoices.add(product);
                 }
+                invoiceDto.setProductItemInvoices(listProductItemInvoices);
                 invoiceDto.setTotalPrice(Math.ceil(totalCost * 100.0) / 100.0);
                 responses.add(invoiceDto);
             }
@@ -65,7 +80,7 @@ public class InvoiceService implements IInvoiceService {
             double totalCost = 0;
             List<ProductItemInvoiceDto> listProductItemInvoices = new ArrayList<>();
             for(ProductItemInvoiceEntity productItemInvoice : invoice.getProductItemInvoices()) {
-                totalCost += productItemInvoice.getCost();
+                totalCost += productItemInvoice.getCost() * productItemInvoice.getQuantity();
                 ProductItemInvoiceDto product = new ProductItemInvoiceDto();
                 mapper.map(productItemInvoice, product);
                 // Lấy ra thông tin sản phẩm
@@ -73,6 +88,9 @@ public class InvoiceService implements IInvoiceService {
                 JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItemInvoice.getProductItem().getId());
                 if(object != null) {
                     JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                    JSONObject nameProduct = new JSONObject();
+                    nameProduct.put("nameProduct", productItemInvoice.getProductItem().getProduct().getName());
+                    productDetail.add(nameProduct);
                     product.setProduct(productDetail);
                 }
                 listProductItemInvoices.add(product);
