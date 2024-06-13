@@ -4,6 +4,7 @@ import com.javatechie.api.ApiAddInfoToBroker;
 import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.UserDto;
 import com.javatechie.entity.User;
+import com.javatechie.repository.OrderRepository;
 import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.service.IUserService;
 import com.javatechie.util.CheckPassWord;
@@ -29,6 +30,8 @@ public class UserService implements IUserService {
     private UserInfoRepository userInfoRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private OrderRepository orderRepository;
     @Override
     @Transactional
     public JSONObject addUser(UserDto user, Integer role) {
@@ -231,7 +234,12 @@ public class UserService implements IUserService {
 
     @Override
     public List<Long> findAllProductBought(Integer userId) {
-
+        try {
+            return orderRepository.findALlProductBoughtByUser(userId);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

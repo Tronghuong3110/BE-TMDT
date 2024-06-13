@@ -17,6 +17,7 @@ public class UserInfoUserDetails implements UserDetails {
     private String name;
     private String password;
     private String roles;
+    private Integer userId;
     private List<GrantedAuthority> authorities;
 
     public UserInfoUserDetails() {
@@ -30,6 +31,7 @@ public class UserInfoUserDetails implements UserDetails {
                 .collect(Collectors.toList());
         this.roles = user.getRoles();
         this.name = user.getName();
+        this.userId = user.getId();
     }
 
     @Override

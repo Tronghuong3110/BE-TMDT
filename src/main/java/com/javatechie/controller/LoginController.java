@@ -13,6 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @CrossOrigin("*")
@@ -37,6 +39,8 @@ public class LoginController {
                 jsonObject.put("token", jwtService.generateToken(userDto.getUsername()));
                 jsonObject.put("role", userDetails.getRoles());
                 jsonObject.put("name", userDetails.getName());
+                List<Long> products = userService.findAllProductBought(userDetails.getUserId());
+                jsonObject.put("listProductBought", products);
                 return ResponseEntity.ok(jsonObject);
             }
             jsonObject.put("code", 0);

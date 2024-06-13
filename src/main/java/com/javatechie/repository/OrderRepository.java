@@ -20,4 +20,10 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     @Query(value = "select * from orders where (:status is null or status_order_int = :status)", nativeQuery = true)
     List<OrderEntity> findAllOrder(@Param("status") Integer status);
+
+    @Query(value = "select distinct product_item.product_id from orders " +
+                    "join cart_item on cart_item.order_id = orders.id " +
+                    "join product_item on cart_item.product_item_id = product_item.id " +
+                    "where orders.user_id = :userId and orders.status_order_int != 4;", nativeQuery = true)
+    List<Long> findALlProductBoughtByUser(@Param("userId") Integer userId);
 }
