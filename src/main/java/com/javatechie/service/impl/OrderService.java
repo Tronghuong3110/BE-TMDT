@@ -106,7 +106,6 @@ public class OrderService implements IOrderService {
                 listResponse.add(cartItemDto);
             }
             response.put("listItem", listResponse);
-
             // lấy thông tin người mua hàng
             User user = userInfoRepository.findByIdAndDeleted(order.getUser().getId(), 0).orElse(null);
             UserDto userDto = new UserDto();
@@ -114,10 +113,11 @@ public class OrderService implements IOrderService {
             userDto.setPassword(null);
             userDto.setRoles(null);
             response.put("infoUser", userDto);
-
             OrderDto orderDto = new OrderDto();
             mapper.map(order, orderDto);
             orderDto.setCartItems(null);
+            UserVoucherDto voucher = new UserVoucherDto();
+            mapper.map(order.getVoucher(), voucher);
             response.put("infoOrder", orderDto);
             return response;
         }

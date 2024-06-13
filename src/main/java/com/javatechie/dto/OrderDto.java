@@ -20,4 +20,5 @@ public class OrderDto {
     private String statusOrder;
     private List<CartItemDto> cartItems;
     private List<Integer> itemOrders; // danh sách id của cartItem
+    private UserVoucherDto voucher;
 }
