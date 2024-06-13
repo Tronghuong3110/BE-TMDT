@@ -1,6 +1,5 @@
 package com.javatechie.dto;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.sql.Date;

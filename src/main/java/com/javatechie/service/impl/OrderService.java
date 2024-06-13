@@ -14,9 +14,6 @@ import org.json.simple.parser.JSONParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +22,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -285,11 +281,11 @@ public class OrderService implements IOrderService {
                     response.put("message", "Đơn hàng của bạn đang được vận chuyển không thể hủy đơn hàng !!");
                     return response;
                 }
-                if (timeCancel >= 24*3600*1000) {
-                    response.put("code", 0);
-                    response.put("message", "Đơn hàng của bạn đã quá thời gian hủy đơn !!");
-                    return response;
-                }
+//                if (timeCancel >= 24*3600*1000) {
+//                    response.put("code", 0);
+//                    response.put("message", "Đơn hàng của bạn đã quá thời gian hủy đơn !!");
+//                    return response;
+//                }
                 String statusStr = convertStatusIntToStatusStr(4);
                 order.setStatusOrderInt(4);
                 order.setStatusOrder(statusStr);
