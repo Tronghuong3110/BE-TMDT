@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface IOrderService {
 
-    List<OrderDto> findAllOrder();
+    List<OrderDto> findAllOrder(Integer status);
     JSONObject getListItemOfOrder(Long orderId);
     JSONObject saveOrder(OrderDto orderDto, Long shipmentMethod, Long paymentMethod, Long voucherId, String orderInfo, String responseCode, String transactionCode, String bankTranNo);
     JSONObject paymentOnline(OrderDto order);

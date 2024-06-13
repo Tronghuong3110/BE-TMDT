@@ -20,9 +20,8 @@ public class OrderController {
     private IOrderService orderService;
 
     @GetMapping("/orders")
-//    @PreAuthorize("hasAuthority('ADMIN')")
-    public List<OrderDto> findAll() {
-        return orderService.findAllOrder();
+    public List<OrderDto> findAll(@RequestParam("status")Optional<Integer> status) {
+        return orderService.findAllOrder(status.orElse(null));
     }
 
     @GetMapping("/order")

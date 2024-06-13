@@ -6,6 +6,7 @@ import com.javatechie.dto.*;
 import com.javatechie.entity.*;
 import com.javatechie.repository.*;
 import com.javatechie.service.IOrderService;
+import com.javatechie.util.AlertNotify;
 import com.javatechie.util.MapperUtil;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -48,16 +49,16 @@ public class OrderService implements IOrderService {
 
     // lấy ra danh sách đơn hàng đã đặt (dành cho người dùng và admin)
     @Override
-    public List<OrderDto> findAllOrder() {
+    public List<OrderDto> findAllOrder(Integer status) {
         try {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
             List<OrderEntity> listOrder = new ArrayList<>();
             if(user.getRoles().contains("ADMIN")) {
-                listOrder = orderRepository.findAll();
+                listOrder = orderRepository.findAllOrder(status);
             }
             else {
-                listOrder = orderRepository.findAllByUserId(user.getId());
+                listOrder = orderRepository.findAllByUserId(user.getId(), status);
             }
             List<OrderDto> listResponse = new ArrayList<>();
             for(OrderEntity order : listOrder) {
@@ -196,6 +197,7 @@ public class OrderService implements IOrderService {
                 voucher.setUsed(true);
                 userVoucherRepository.save(voucher);
             }
+            AlertNotify.senMessage("Bạn có đơn hàng mới !!");
             BeanUtils.copyProperties(order, orderDto);
             response.put("code", 1);
             response.put("message", "Đặt hàng thành công !!");
