@@ -1,5 +1,6 @@
 package com.javatechie.service.impl;
 
+import com.javatechie.api.ApiAddInfoToBroker;
 import com.javatechie.config.UserInfoUserDetails;
 import com.javatechie.dto.UserDto;
 import com.javatechie.entity.User;
@@ -12,11 +13,11 @@ import org.json.simple.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class UserService implements IUserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Override
+    @Transactional
     public JSONObject addUser(UserDto user, Integer role) {
         JSONObject response = new JSONObject();
         try {
@@ -49,7 +51,6 @@ public class UserService implements IUserService {
                 response.put("message", "Password is not valid");
                 return response;
             }
-
             User userEntity = new User();
             BeanUtils.copyProperties(user, userEntity);
             userEntity.setRoles(checkRoles(role));
@@ -58,16 +59,29 @@ public class UserService implements IUserService {
             userEntity.setDeleted(0);
             userEntity = userInfoRepository.save(userEntity);
             BeanUtils.copyProperties(userEntity, user);
+            if(userEntity.getRoles().contains("ADMIN") || userEntity.getRoles().contains("EMPLOYEE")) {
+                // thêm mới topic vào db
+                String topic = "buy";
+                // thêm mới user vào broker
+                boolean addUserToBroker = ApiAddInfoToBroker.addUserToBroker(user.getUsername(), user.getPassword());
+                if(!addUserToBroker) {
+                    response.put("code", 0);
+                    response.put("message", "Đăng ký tài khoản lỗi !!");
+                    userInfoRepository.deleteById(userEntity.getId());
+                    return response;
+                }
+                // thêm mới role cho user để đăng ký subcribe và publish với chính topic của user
+                String responseAddRole = ApiAddInfoToBroker.addRuleToBroker(user.getUsername(), topic);
+            }
             response.put("code", 1);
-            response.put("message", "Add new user success!!");
+            response.put("message", "Đăng ký tài khoản thành công !!");
             response.put("user", user);
             return response;
         }
         catch (Exception e) {
-            System.out.println("Đăng ký tài khoản lỗi rồi!!");
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Add new user fail!!");
+            response.put("message", "Đăng ký tài khoản lỗi !!");
         }
         return response;
     }
