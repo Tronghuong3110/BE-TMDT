@@ -112,8 +112,6 @@ public class OrderService implements IOrderService {
             OrderDto orderDto = new OrderDto();
             mapper.map(order, orderDto);
             orderDto.setCartItems(null);
-            UserVoucherDto voucher = new UserVoucherDto();
-            mapper.map(order.getVoucher(), voucher);
             response.put("infoOrder", orderDto);
             return response;
         }
@@ -352,14 +350,16 @@ public class OrderService implements IOrderService {
             cartItemDto.setImages(imageDtos);
             JSONParser parser = new JSONParser();
             JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(cartItem.getProductItem().getId());
-            JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
-            JSONObject quantity = new JSONObject();
-            quantity.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
-            quantity.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
-            quantity.put("productItemId", cartItem.getProductItem().getId());
-            quantity.put("price", cartItem.getProductItem().getPrice());
-            productDetail.add(quantity);
-            cartItemDto.setProductItemDetail(productDetail);
+            if(object != null) {
+                JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
+                JSONObject quantity = new JSONObject();
+                quantity.put("quantity_stock", cartItem.getProductItem().getQuantityInStock());
+                quantity.put("quantity_sold", cartItem.getProductItem().getQuantitySold());
+                quantity.put("productItemId", cartItem.getProductItem().getId());
+                quantity.put("price", cartItem.getProductItem().getPrice());
+                productDetail.add(quantity);
+                cartItemDto.setProductItemDetail(productDetail);
+            }
             cartItemDto.setProductName(product.getName());
             // Lấy ra category
             CategoryEntity category = product.getCategory();

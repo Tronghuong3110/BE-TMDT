@@ -242,7 +242,7 @@ public class ItemService implements IItemService {
             // thêm mới vào danh sách item đã xem của user
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             Object authPrincipal = auth.getPrincipal();
-            if(!(authPrincipal.equals("anonymousUser"))) {
+            if(!(authPrincipal.equals("anonymousUser")) && !isFindAll) {
                 // TH đã đăng nhập
                 UserInfoUserDetails userDetails = (UserInfoUserDetails) authPrincipal;
                 User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());

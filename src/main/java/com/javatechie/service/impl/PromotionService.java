@@ -5,6 +5,7 @@ import com.javatechie.dto.ProductItemDto;
 import com.javatechie.dto.PromotionDto;
 import com.javatechie.entity.*;
 import com.javatechie.repository.ProductItemRepository;
+import com.javatechie.repository.ProductRepository;
 import com.javatechie.repository.PromotionRepository;
 import com.javatechie.repository.UserInfoRepository;
 import com.javatechie.service.IPromotionService;
@@ -35,6 +36,8 @@ public class PromotionService implements IPromotionService {
     private ProductItemRepository productItemRepository;
     @Autowired
     private ItemService itemService;
+    @Autowired
+    private ProductRepository productRepository;
 
     @Override
     public JSONObject savePromotion(PromotionDto promotionDto) {
@@ -55,24 +58,19 @@ public class PromotionService implements IPromotionService {
             promotion = promotionRepository.save(promotion);
             List<PromotionEntity> listPromotion = new ArrayList<>();
             listPromotion.add(promotion);
-            List<JSONArray> listItem = new ArrayList<>();
+            List<JSONObject> listItem = new ArrayList<>();
             // chọn sản phầm áp dụng khuyến mại
             if(promotionDto.getIdItems() != null) {
                 JSONParser parser = new JSONParser();
+                // idItem chuyển thành id product
                 for(Long idItem : promotionDto.getIdItems()) {
-                    ProductItemEntity productItem = productItemRepository.findByIdAndDeleted(idItem, 0).orElse(null);
-                    if(productItem == null) continue;
-                    productItem.setPromotions(listPromotion);
-                    productItemRepository.save(productItem);
-                    JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(idItem);
-                    if(object == null) continue;
-                    JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
-                    JSONObject quantity = new JSONObject();
-                    quantity.put("quantity_stock", productItem.getQuantityInStock());
-                    quantity.put("quantity_sold", productItem.getQuantitySold());
-                    quantity.put("productItemId", productItem.getId());
-                    quantity.put("price", productItem.getPrice());
-                    productDetail.add(quantity);
+                    ProductEntity product = productRepository.findByIdAndDeleted(idItem, false).orElse(new ProductEntity());
+                    for(ProductItemEntity productItem : product.getProductItems()) {
+                        if(productItem == null) continue;
+                        productItem.setPromotions(listPromotion);
+                        productItemRepository.save(productItem);
+                    }
+                    JSONObject productDetail = itemService.findOneById(idItem, true);
                     listItem.add(productDetail);
                 }
             }
@@ -170,34 +168,29 @@ public class PromotionService implements IPromotionService {
             promotion = promotionRepository.save(promotion);
             List<PromotionEntity> listPromotion = new ArrayList<>();
             listPromotion.add(promotion);
-            List<JSONArray> listItem = new ArrayList<>();
+            List<JSONObject> listItem = new ArrayList<>();
             // cập nhật thêm sản phẩm được áp dụng khuyến mại
             if(promotionDto.getIdItems() != null) {
                 JSONParser parser = new JSONParser();
                 for(Long idItem : promotionDto.getIdItems()) {
-                    ProductItemEntity productItem = productItemRepository.findByIdAndDeleted(idItem, 0).orElse(null);
-                    if(productItem == null) continue;
-                    productItem.setPromotions(listPromotion);
-                    productItemRepository.save(productItem);
-                    JSONObject object = productItemRepository.findAllProductItemDetailByProductItem(productItem.getId());
-                    if(object == null) continue;
-                    JSONArray productDetail = (JSONArray) parser.parse(object.get("item_detail").toString());
-                    JSONObject quantity = new JSONObject();
-                    quantity.put("quantity_stock", productItem.getQuantityInStock());
-                    quantity.put("quantity_sold", productItem.getQuantitySold());
-                    quantity.put("productItemId", productItem.getId());
-                    quantity.put("price", productItem.getPrice());
-                    productDetail.add(quantity);
+                    ProductEntity product = productRepository.findByIdAndDeleted(idItem, false).orElse(new ProductEntity());
+                    for(ProductItemEntity productItem : product.getProductItems()) {
+                        if(productItem == null) continue;
+                        productItem.setPromotions(listPromotion);
+                        productItemRepository.save(productItem);
+                    }
+                    JSONObject productDetail = itemService.findOneById(idItem, true);
                     listItem.add(productDetail);
                 }
             }
             // loại bỏ khuyến mại của một vaài sản phẩm được yêu cầu
             if(promotionDto.getIdItemsRemove() != null) {
                 for(Long idItem : promotionDto.getIdItemsRemove()) {
-                    ProductItemEntity productItem = productItemRepository.findByIdAndDeleted(idItem, 0).orElse(null);
-                    if(productItem == null) continue;
-                    productItem.setPromotions(null);
-                    productItemRepository.save(productItem);
+                    ProductEntity product = productRepository.findByIdAndDeleted(idItem, false).orElse(new ProductEntity());
+                    for(ProductItemEntity productItem : product.getProductItems()) {
+                        productItem.setPromotions(null);
+                        productItemRepository.save(productItem);
+                    }
                 }
             }
             BeanUtils.copyProperties(promotion, promotionDto);
