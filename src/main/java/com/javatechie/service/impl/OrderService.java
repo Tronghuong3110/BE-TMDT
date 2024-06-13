@@ -52,7 +52,7 @@ public class OrderService implements IOrderService {
             UserInfoUserDetails userDetails = (UserInfoUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
             List<OrderEntity> listOrder = new ArrayList<>();
-            if(user.getRoles().contains("ADMIN")) {
+            if(user.getRoles().contains("ADMIN") || user.getRoles().contains("EMPLOYEE")) {
                 listOrder = orderRepository.findAllOrder(status);
             }
             else {
