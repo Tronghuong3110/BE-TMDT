@@ -14,6 +14,8 @@ import org.json.simple.parser.JSONParser;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -158,12 +160,27 @@ public class OrderService implements IOrderService {
                 cartItem.setOrdered(1);
                 ProductItemEntity itemDetail = cartItem.getProductItem();
                 itemDetail.setQuantitySold(cartItem.getQuantity() + itemDetail.getQuantitySold());
-                if(itemDetail.getQuantitySold() >= itemDetail.getQuantityInStock()) {
-                    break;
+                // checkkQuantityProduct == true ==> sản phẩm trong kho không đủ để bán
+                if (checkQuantityProduct(itemDetail, cartItem)) {
+                    // update lại toàn bộ cartItem có orderId = order.id thành null và ordered = 0
+                    cartItemRepository.updateByOrder_Id(order.getId());
+                    order.setStatusOrderInt(-1);
+                    orderRepository.save(order);
+                    String message = "Sản phẩm  " + cartItem.getProductItem().getProduct().getName().toUpperCase() + " cần được bổ xung thêm !!";
+                    NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, null, System.currentTimeMillis());
+                    notifyRepository.save(notify);
+                    // đếm số thống báo chưa đọc
+                    Integer countNotify = notifyRepository.countAllByAck(0);
+                    AlertNotify.senMessage("" + countNotify);
+                    response.put("code", 0);
+                    response.put("message", "Đơn hàng của bạn có sản phẩm đã hết hàng !!");
+                    response.put("order", null);
+                    return response;
                 }
                 cartItemRepository.save(cartItem);
                 productItemRepository.save(itemDetail);
             }
+            // TH không có sản phẩm nào hết hàng
             if(voucher != null) {
                 voucher.setUsed(true);
                 userVoucherRepository.save(voucher);
@@ -194,6 +211,21 @@ public class OrderService implements IOrderService {
     public JSONObject paymentOnline(OrderDto order) {
         JSONObject response = new JSONObject();
         try {
+            // kiểm tra xem có sản phẩm nào hết hàng không
+            for(Integer idItem : order.getItemOrders()) {
+                CartItemEntity cartItem = cartItemRepository.findById(idItem).orElse(new CartItemEntity());
+                if(checkQuantityProduct(cartItem.getProductItem(), cartItem)) {
+                    String message = "Sản phẩm có tên " + cartItem.getProductItem().getProduct().getName().toUpperCase() + " chỉ còn " + Math.abs(cartItem.getProductItem().getQuantitySold() - cartItem.getProductItem().getQuantitySold()) + " sản phẩm, cần được bổ xung thêm !!";
+                    NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis());
+                    notifyRepository.save(notify);
+                    // đếm số thống báo chưa đọc
+                    Integer countNotify = notifyRepository.countAllByAck(0);
+                    AlertNotify.senMessage("" + countNotify);
+                    response.put("code", 0);
+                    response.put("message", "Đơn hàng của bạn có sản phẩm đã hết hàng !!");
+                    return response;
+                }
+            }
             // Thực hiện thanh toán online
             long amount = order.getTotalPrice()*100;
             String bankCode = "NCB";
@@ -373,5 +405,10 @@ public class OrderService implements IOrderService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private boolean checkQuantityProduct(ProductItemEntity productItem, CartItemEntity cartItem) {
+        // nếu lượng hàng trong kho còn lại ít hơn lượng hàng đã bán + lượng hàng cần mua hiện tại ==> không đủ hàng ==> không lập đơn được
+        return productItem.getQuantityInStock() < productItem.getQuantitySold() + cartItem.getQuantity();
     }
 }

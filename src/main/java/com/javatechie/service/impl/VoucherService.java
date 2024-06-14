@@ -41,12 +41,12 @@ public class VoucherService implements IVoucherService {
             Boolean checkName = voucherRepository.existsByName(voucherDto.getName());
             if(checkName) {
                 response.put("code", 0);
-                response.put("message", "Name has been duplicated!!");
+                response.put("message", "Tên khuyến mại bị trùng !!");
                 return response;
             }
             if(voucherDto.getStartDate().compareTo(voucherDto.getEndDate()) > 0) {
                 response.put("code", 0);
-                response.put("message", "The start date cannot be greater than the end date!!");
+                response.put("message", "Ngày bắt đầu phải nhỏ hơn ngày kết thúc !!");
                 return response;
             }
             VoucherEntity voucher = new VoucherEntity();
@@ -57,7 +57,7 @@ public class VoucherService implements IVoucherService {
             voucher = voucherRepository.save(voucher);
             BeanUtils.copyProperties(voucher, voucherDto);
             response.put("code", 1);
-            response.put("message", "Add new voucher success");
+            response.put("message", "Thêm mới thành công !!");
             response.put("voucher", voucherDto);
         }
         catch (Exception e) {
@@ -96,7 +96,7 @@ public class VoucherService implements IVoucherService {
             VoucherDto voucherDto = new VoucherDto();
             if(voucher.size() <= 0) {
                 response.put("code", 0);
-                response.put("message", "Can not found voucher with id = " + id);
+                response.put("message", "Không tìm thấy voucher với id = " + id);
                 return response;
             }
             BeanUtils.copyProperties(voucher.get(0), voucherDto);
@@ -106,7 +106,7 @@ public class VoucherService implements IVoucherService {
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Find voucher by id error");
+            response.put("message", "Tìm voucher lỗi !!");
         }
         return response;
     }
@@ -119,31 +119,31 @@ public class VoucherService implements IVoucherService {
             VoucherEntity voucherCheck = voucherRepository.findByNameAndDeleted(voucherDto.getName(), 0).orElse(null);
             if(voucherCheck != null && !voucherCheck.getId().equals(voucherDto.getId())) {
                 response.put("code", 0);
-                response.put("message", "Can not update voucher because of name duplicated");
+                response.put("message", "Không thể cập nhật voucher do tên voucher bị trùng !!");
                 return response;
             }
             if(voucher.size() <= 0) {
                 response.put("code", 0);
-                response.put("message", "Can not found voucher with id = " + voucherDto.getId());
+                response.put("message", "Không thể tìm thấy voucher với id = " + voucherDto.getId());
                 return response;
             }
             VoucherEntity voucherentity = voucher.get(0);
             voucherentity = convertToEntity(voucherentity, voucherDto);
             if (voucherentity == null) {
                 response.put("code", 0);
-                response.put("message", "Update voucher error");
+                response.put("message", "Cập nhật voucher thất bại !!");
                 return response;
             }
             voucherRepository.save(voucherentity);
             response.put("code", 1);
-            response.put("message", "Update voucher success");
+            response.put("message", "Cập nhật voucher thành công !!");
             BeanUtils.copyProperties(voucherentity, voucherDto);
             response.put("voucher", voucherDto);
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Update voucher error");
+            response.put("message", "Cập nhật voucher thất bại !!");
             response.put("voucher", null);
         }
         return response;
@@ -156,13 +156,13 @@ public class VoucherService implements IVoucherService {
             VoucherEntity voucher = voucherRepository.findById(id).orElse(null);
             if(voucher == null) {
                 response.put("code", 0);
-                response.put("message", "Can not found voucher with id = " + id);
+                response.put("message", "Không thể tìm thấy voucher với id = " + id);
                 return response;
             }
             voucher.setDeleted(1);
             voucherRepository.save(voucher);
             response.put("code", 1);
-            response.put("message", "Delete voucher success");
+            response.put("message", "Xóa voucher thành công !!");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -177,7 +177,7 @@ public class VoucherService implements IVoucherService {
             VoucherEntity voucher = voucherRepository.findById(idVoucher).orElse(new VoucherEntity());
             Date currentDate = new Date(System.currentTimeMillis());
             if(currentDate.compareTo(voucher.getEndDate()) >= 1 || voucher.getNumberRemain() <= 0) {
-                response.put("message", "Voucher expired");
+                response.put("message", "Voucher đã hết hạn !!");
                 response.put("code", 0);
                 response.put("userVoucher", null);
                 return response;
@@ -187,7 +187,7 @@ public class VoucherService implements IVoucherService {
             UserVoucherEntity oldVoucherUser = userVoucherRepository.findByUser_IdAndVoucher_Id(user.getId(), voucher.getId()).orElse(null);
             if(oldVoucherUser != null) {
                 response.put("code", 0);
-                response.put("message", "Voucher exists!!");
+                response.put("message", "Voucher đã tồn tại !!");
                 return response;
             }
             UserVoucherEntity userVoucherEntity = new UserVoucherEntity(System.currentTimeMillis(), new Date(System.currentTimeMillis()), voucher.getEndDate(), false, user, voucher, null);
@@ -195,12 +195,12 @@ public class VoucherService implements IVoucherService {
             voucher.setNumberRemain(voucher.getNumberRemain()-1);
             voucherRepository.save(voucher);
             response.put("code", 1);
-            response.put("message", "Create voucher success");
+            response.put("message", "Nhận voucher thành công !!");
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
-            response.put("message", "Create voucher fail");
+            response.put("message", "Nhận voucher thất bại !!");
         }
         return response;
     }

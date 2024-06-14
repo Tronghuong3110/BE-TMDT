@@ -2,6 +2,7 @@ package com.javatechie.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 import org.modelmapper.internal.bytebuddy.matcher.InheritedAnnotationMatcher;
 
 @Data
@@ -23,7 +24,7 @@ public class CartItemEntity {
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private CartEntity cart;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id")
     private OrderEntity order;
 }

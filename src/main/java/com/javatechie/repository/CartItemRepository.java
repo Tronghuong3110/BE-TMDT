@@ -4,8 +4,11 @@ import com.javatechie.entity.CartItemEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +31,9 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, Intege
             "JOIN product ON subquery.id = product.id\n" +
             "GROUP BY product.id", nativeQuery = true)
     List<JSONObject> statisticTopProduct();
+
+    @Modifying
+    @Query(value = "update cart_item set order_id = default, ordered = 0 " +
+                    "where order_id = :orderId", nativeQuery = true)
+    void updateByOrder_Id(@Param("orderId") Long orderId);
 }
