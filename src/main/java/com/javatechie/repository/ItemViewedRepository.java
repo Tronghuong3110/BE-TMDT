@@ -14,4 +14,6 @@ public interface ItemViewedRepository extends JpaRepository<ItemViewedEntity, Lo
     Optional<ItemViewedEntity> findByItemIdAndUserId(Long itemId, Integer userId);
     @Query(value = "select * from item_view where (:favorite is null or favorite = :favorite) and (:viewed is null or viewed = :viewed) and user_id = :userId", nativeQuery = true)
     List<ItemViewedEntity> findAllByFavoriteOrViewedAndUser(@Param("favorite")Integer favorite, @Param("viewed")Integer viewed, @Param("userId")Integer userId);
+
+//    Optional<ItemViewedEntity> findByUserIdAndItemId(Integer userId, Long itemId);
 }

@@ -246,6 +246,8 @@ public class ItemService implements IItemService {
                 // TH đã đăng nhập
                 UserInfoUserDetails userDetails = (UserInfoUserDetails) authPrincipal;
                 User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
+                // nếu tìm thấy ==> người dùng này đã xem sản phẩm này ==> không tạo mới nữa
+                // nguợc lại ==> tạo mới và lưu vào db
                 ItemViewedEntity itemViewed = itemViewedRepository.findByItemIdAndUserId(product.getId(), user.getId()).orElse(
                         new ItemViewedEntity(System.currentTimeMillis(), product.getId(), user.getId(), 1, 0));
                 itemViewed.setViewed(1);
@@ -386,8 +388,11 @@ public class ItemService implements IItemService {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             UserInfoUserDetails userDetails = (UserInfoUserDetails) auth.getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userDetails.getUsername(), 0).orElse(new User());
-            ItemViewedEntity itemViewedEntity = new ItemViewedEntity(System.currentTimeMillis(), item.getId(), user.getId(), 0, 1);
-            itemViewedEntity = itemViewedRepository.save(itemViewedEntity);
+            ItemViewedEntity itemViewedEntity = itemViewedRepository.findByItemIdAndUserId(item.getId(), user.getId()).orElse(null);
+            if(itemViewedEntity == null ) { // TH user chưa đánh dấu yêu thích sản phẩm này
+                itemViewedEntity = new ItemViewedEntity(System.currentTimeMillis(), item.getId(), user.getId(), 0, 1);
+                itemViewedEntity = itemViewedRepository.save(itemViewedEntity);
+            }
             response.put("code", 1);
             response.put("message", "Thêm mới sản phẩm yêu thích thành công !!");
             response.put("itemFavorite", itemViewedEntity.getId());
@@ -423,7 +428,7 @@ public class ItemService implements IItemService {
         return null;
     }
 
-    @Override
+    @Override // nhập hàng
     public List<JSONObject> importItem(List<ProductItemDto> productItems, Long supplierId) {
         JSONArray responses = new JSONArray();
         try {
