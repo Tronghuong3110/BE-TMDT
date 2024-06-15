@@ -1,6 +1,7 @@
 package com.javatechie.repository;
 
 import com.javatechie.entity.OrderEntity;
+import org.json.simple.JSONObject;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
@@ -29,4 +31,9 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
                     "join product_item on cart_item.product_item_id = product_item.id " +
                     "where orders.user_id = :userId and orders.status_order_int not in (-1, 4);", nativeQuery = true)
     List<Long> findALlProductBoughtByUser(@Param("userId") Integer userId);
+
+    @Query(value = "select sum(total_price) as total, date_format(create_date, \"%Y-%m\") as months from orders " +
+                    "where status_order_int not in (4, -1) and date_format(create_date, \"%Y-%m\") = :month " +
+                    "group by months", nativeQuery = true)
+    Optional<JSONObject> calculatorTotalRevenueByMonth(@Param("month") String month);
 }

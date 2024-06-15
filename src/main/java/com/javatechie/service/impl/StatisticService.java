@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.awt.image.AreaAveragingScaleFilter;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -77,6 +78,39 @@ public class StatisticService implements IStatisticService {
 
     @Override
     public JSONObject statisticProductSoldByYear(Integer year) {
-        return null;
+        JSONObject response = new JSONObject();
+        try {
+            List<JSONObject> totalRevenue = new ArrayList<>();
+            List<JSONObject> totalCost = new ArrayList<>();
+            List<JSONObject> totalProfit = new ArrayList<>();
+            for(int i = 1; i <= 12; i++) {
+                String month = year + "-" + (i < 10 ? "0"+i : i);
+                JSONObject tmp = new JSONObject();
+                tmp.put("total", 0);
+                tmp.put("months", month);
+                // lợi nhuận
+                JSONObject revenue = orderRepository.calculatorTotalRevenueByMonth(month).orElse(tmp);
+                totalRevenue.add(revenue);
+                // chi phí
+                JSONObject cost = productItemInvoiceRepository.calculatorCostByMonth(month).orElse(tmp);
+                totalCost.add(cost);
+                // tính lợi nhuận
+                double profit = Double.parseDouble(revenue.get("total").toString()) - Double.parseDouble(cost.get("total").toString());
+                JSONObject profitTmp = new JSONObject(tmp);
+                profitTmp.put("total", profit);
+                totalProfit.add(profitTmp);
+                System.out.println(cost);
+            }
+            response.put("revenue", totalRevenue);
+            response.put("cost", totalCost);
+            response.put("profit", totalProfit);
+            response.put("code", 1);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            response.put("code", 0);
+            response.put("message", "Thống kê lỗi !!");
+        }
+        return response;
     }
 }

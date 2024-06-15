@@ -183,6 +183,7 @@ public class ItemService implements IItemService {
             response.put("images", images);
             // Lấy danh sách review (dành cho lấy ra thông tin sản phẩm chi tiêt)
             if(!isFindAll) {
+                // danh sách review
                 List<ReviewEntity> reviewEntities = product.getReviews();
                 List<ReviewDto> reviews = new ArrayList<>();
                 for(ReviewEntity review : reviewEntities) {
@@ -191,6 +192,7 @@ public class ItemService implements IItemService {
                     reviews.add(reviewDto);
                 }
                 response.put("reviews", reviews);
+                // danh sách comment
                 List<CommentEntity> commentEntities = product.getComments();
                 List<CommentDto> comments = new ArrayList<>();
                 for(CommentEntity comment : commentEntities) {
@@ -202,6 +204,9 @@ public class ItemService implements IItemService {
                     comments.add(commentDto);
                 }
                 response.put("comments", comments);
+                // danh sách số lượng đánh giá theo từng sao
+                List<JSONObject> numberStar = reviewRepository.countStarByProduct(productId);
+                response.put("number_star", numberStar);
             }
             // Lấy danh sách itemDetail (Là danh sách productItem)
             JSONParser parser = new JSONParser();

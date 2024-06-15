@@ -38,9 +38,13 @@ public class StatisticsController {
         return statisticService.findAllTopProductBestSeller();
     }
 
-    @GetMapping("statistic/year")
+    @GetMapping("/statistic/year")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> statisticByYear(@RequestParam("year") Integer year) {
-        return null;
+        JSONObject response = statisticService.statisticProductSoldByYear(year);
+        if(response.get("code").equals(0)) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 }
