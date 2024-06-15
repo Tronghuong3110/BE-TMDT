@@ -390,13 +390,13 @@ public class ItemService implements IItemService {
             itemViewedEntity = itemViewedRepository.save(itemViewedEntity);
             response.put("code", 1);
             response.put("message", "Thêm mới sản phẩm yêu thích thành công !!");
-            response.put("itemView", itemViewedEntity.getId());
+            response.put("itemFavorite", itemViewedEntity.getId());
         }
         catch (Exception e) {
             e.printStackTrace();
             response.put("code", 0);
             response.put("message", "Thêm mới sản phẩm yêu thích thất bại !!");
-            response.put("itemView", null);
+            response.put("itemFavorite", null);
         }
         return response;
     }
