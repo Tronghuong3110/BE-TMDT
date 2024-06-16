@@ -8,4 +8,6 @@ import java.util.List;
 public interface INotificationService {
     List<NotificationDto> findAll();
     JSONObject updateAck(Long notificationId);
+
+    Integer countNotification();
 }

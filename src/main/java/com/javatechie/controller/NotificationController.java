@@ -29,4 +29,11 @@ public class NotificationController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/count/notification")
+    public ResponseEntity<?> countNotification() {
+        Integer count = notificationService.countNotification();
+        if(count == null) return ResponseEntity.badRequest().body("Lỗi");
+        return ResponseEntity.ok(count);
+    }
 }

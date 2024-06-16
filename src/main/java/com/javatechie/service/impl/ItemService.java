@@ -316,34 +316,36 @@ public class ItemService implements IItemService {
             }
             product = productRepository.save(product);
             // cập nhật ảnh
-            List<Integer> idOlds = productDto.getImages()
-                    .stream()
-                    .filter(image -> image.getId() != null)
-                    .map(ImageDto::getId)
-                    .toList();
-            List<ImageEntity> listImageOld = imageRepository.findAllByProduct_Id(product.getId());
-            List<ImageDto> imageDtos = new ArrayList<>();
-            // loại bỏ những hình ảnh đã xóa
-            for(ImageEntity image : listImageOld) {
-                if(!idOlds.contains(image.getId())) {
-                    imageRepository.delete(image);
+            if(productDto.getImages() != null) {
+                List<Integer> idOlds = productDto.getImages()
+                        .stream()
+                        .filter(image -> image.getId() != null)
+                        .map(ImageDto::getId)
+                        .toList();
+                List<ImageEntity> listImageOld = imageRepository.findAllByProduct_Id(product.getId());
+                List<ImageDto> imageDtos = new ArrayList<>();
+                // loại bỏ những hình ảnh đã xóa
+                for(ImageEntity image : listImageOld) {
+                    if(!idOlds.contains(image.getId())) {
+                        imageRepository.delete(image);
+                    }
                 }
-            }
-            // thêm mới image mới hoặc update lại path của image cũ
-            for(ImageDto image : productDto.getImages()) {
-                ImageDto imageDto = new ImageDto();
-                ImageEntity imageEntity = null;
-                if(image.getId() != null) {
-                    imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+                // thêm mới image mới hoặc update lại path của image cũ
+                for(ImageDto image : productDto.getImages()) {
+                    ImageDto imageDto = new ImageDto();
+                    ImageEntity imageEntity = null;
+                    if(image.getId() != null) {
+                        imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+                    }
+                    else {
+                        imageEntity = new ImageEntity();
+                    }
+                    mapper.map(image, imageEntity);
+                    imageEntity.setProduct(product);
+                    imageEntity = imageRepository.save(imageEntity);
+                    mapper.map(imageEntity, imageDto);
+                    imageDtos.add(imageDto);
                 }
-                else {
-                    imageEntity = new ImageEntity();
-                }
-                mapper.map(image, imageEntity);
-                imageEntity.setProduct(product);
-                imageEntity = imageRepository.save(imageEntity);
-                mapper.map(imageEntity, imageDto);
-                imageDtos.add(imageDto);
             }
             mapper.map(product, productDto);
             productDto.setComments(null);

@@ -55,4 +55,14 @@ public class NotificationService implements INotificationService {
         }
         return response;
     }
+
+    @Override
+    public Integer countNotification() {
+        try {
+            return notifyRepository.countAllByAck(0);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
 }
