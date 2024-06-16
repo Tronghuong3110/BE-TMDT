@@ -61,20 +61,21 @@ public class UserService implements IUserService {
             userEntity.setCreateDate(new Date(System.currentTimeMillis()));
             userEntity.setDeleted(0);
             userEntity = userInfoRepository.save(userEntity);
-            if(userEntity.getRoles().contains("ADMIN") || userEntity.getRoles().contains("EMPLOYEE")) {
-                // thêm mới topic vào db
-                String topic = "buy";
-                // thêm mới user vào broker
-                boolean addUserToBroker = ApiAddInfoToBroker.addUserToBroker(user.getUsername(), "1234");
-                if(!addUserToBroker) {
-                    response.put("code", 0);
-                    response.put("message", "Đăng ký tài khoản lỗi !!");
-                    userInfoRepository.deleteById(userEntity.getId());
-                    return response;
-                }
-                // thêm mới role cho user để đăng ký subcribe và publish với chính topic của user
-                String responseAddRole = ApiAddInfoToBroker.addRuleToBroker(user.getUsername(), topic);
+//            if(userEntity.getRoles().contains("ADMIN") || userEntity.getRoles().contains("EMPLOYEE")) {
+            // thêm mới topic vào db
+            // nếu là admin hoặc employee ==> subscribe đến topic order, USER ==> subscribe tới buy
+            String topic = userEntity.getRoles().contains("USER") ? "buy" : "order";
+            // thêm mới user vào broker
+            boolean addUserToBroker = ApiAddInfoToBroker.addUserToBroker("test_mqtt1_" + userEntity.getRoles(), "1234");
+            if(!addUserToBroker) {
+                response.put("code", 0);
+                response.put("message", "Đăng ký tài khoản lỗi !!");
+                userInfoRepository.deleteById(userEntity.getId());
+                return response;
             }
+            // thêm mới role cho user để đăng ký subcribe và publish với chính topic của user
+            String responseAddRole = ApiAddInfoToBroker.addRuleToBroker("test_mqtt1_" + userEntity.getRoles(), topic);
+//            }
             BeanUtils.copyProperties(userEntity, user);
             response.put("code", 1);
             response.put("message", "Đăng ký tài khoản thành công !!");
