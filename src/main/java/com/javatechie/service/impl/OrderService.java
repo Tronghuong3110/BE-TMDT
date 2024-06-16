@@ -156,10 +156,7 @@ public class OrderService implements IOrderService {
             // lấy ra danh sách các item người dùng muốn đặt hàng
             for(Integer idCartItem : orderDto.getItemOrders()) {
                 CartItemEntity cartItem = cartItemRepository.findById(idCartItem).orElse(new CartItemEntity());
-                cartItem.setOrder(order);
-                cartItem.setOrdered(1);
                 ProductItemEntity itemDetail = cartItem.getProductItem();
-                itemDetail.setQuantitySold(cartItem.getQuantity() + itemDetail.getQuantitySold());
                 // checkkQuantityProduct == true ==> sản phẩm trong kho không đủ để bán
                 if (checkQuantityProduct(itemDetail, cartItem)) {
                     // update lại toàn bộ cartItem có orderId = order.id thành null và ordered = 0
@@ -177,6 +174,9 @@ public class OrderService implements IOrderService {
                     response.put("order", null);
                     return response;
                 }
+                itemDetail.setQuantitySold(cartItem.getQuantity() + itemDetail.getQuantitySold());
+                cartItem.setOrder(order);
+                cartItem.setOrdered(1);
                 cartItemRepository.save(cartItem);
                 productItemRepository.save(itemDetail);
             }
@@ -333,11 +333,12 @@ public class OrderService implements IOrderService {
                 String statusStr = convertStatusIntToStatusStr(status);
                 order.setStatusOrder(statusStr);
                 order.setStatusOrderInt(status);
-                String message = "Đơn hàng của bạn " + statusStr;
+                String message = "Đơn hàng" + orderId + " của bạn " + statusStr;
                 NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis(), "USER");
                 notifyRepository.save(notify);
                 // đếm số thống báo chưa đọc
                 Integer countNotify = notifyRepository.countAllByAckAndRole(0, "USER");
+                System.out.println();
                 AlertNotify.senMessage("" + countNotify);
                 orderRepository.save(order);
             }
