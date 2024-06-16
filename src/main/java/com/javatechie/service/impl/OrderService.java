@@ -167,10 +167,10 @@ public class OrderService implements IOrderService {
                     order.setStatusOrderInt(-1);
                     orderRepository.save(order);
                     String message = "Sản phẩm  " + cartItem.getProductItem().getProduct().getName().toUpperCase() + " cần được bổ xung thêm !!";
-                    NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, null, System.currentTimeMillis());
+                    NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, null, System.currentTimeMillis(), "ADMIN");
                     notifyRepository.save(notify);
                     // đếm số thống báo chưa đọc
-                    Integer countNotify = notifyRepository.countAllByAck(0);
+                    Integer countNotify = notifyRepository.countAllByAckAndRole(0, "ADMIN");
                     AlertNotify.senMessage("" + countNotify);
                     response.put("code", 0);
                     response.put("message", "Đơn hàng của bạn có sản phẩm đã hết hàng !!");
@@ -187,10 +187,10 @@ public class OrderService implements IOrderService {
             }
             // lưu thông báo vào bảng thống báo và gửi về số lượng các thống báo chưa đọc
             String message = "Bạn có đơn hàng mới từ " + user.getName().toUpperCase();
-            NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis());
+            NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis(), "ADMIN");
             notifyRepository.save(notify);
             // đếm số thống báo chưa đọc
-            Integer countNotify = notifyRepository.countAllByAck(0);
+            Integer countNotify = notifyRepository.countAllByAckAndRole(0, "ADMIN");
             AlertNotify.senMessage("" + countNotify);
             BeanUtils.copyProperties(order, orderDto);
             response.put("code", 1);
@@ -216,10 +216,10 @@ public class OrderService implements IOrderService {
                 CartItemEntity cartItem = cartItemRepository.findById(idItem).orElse(new CartItemEntity());
                 if(checkQuantityProduct(cartItem.getProductItem(), cartItem)) {
                     String message = "Sản phẩm có tên " + cartItem.getProductItem().getProduct().getName().toUpperCase() + " chỉ còn " + Math.abs(cartItem.getProductItem().getQuantitySold() - cartItem.getProductItem().getQuantitySold()) + " sản phẩm, cần được bổ xung thêm !!";
-                    NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis());
+                    NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis(), "ADMIN");
                     notifyRepository.save(notify);
                     // đếm số thống báo chưa đọc
-                    Integer countNotify = notifyRepository.countAllByAck(0);
+                    Integer countNotify = notifyRepository.countAllByAckAndRole(0, "ADMIN");
                     AlertNotify.senMessage("" + countNotify);
                     response.put("code", 0);
                     response.put("message", "Đơn hàng của bạn có sản phẩm đã hết hàng !!");
@@ -333,6 +333,12 @@ public class OrderService implements IOrderService {
                 String statusStr = convertStatusIntToStatusStr(status);
                 order.setStatusOrder(statusStr);
                 order.setStatusOrderInt(status);
+                String message = "Đơn hàng của bạn " + statusStr;
+                NotificationEntity notify = new NotificationEntity(System.currentTimeMillis(), message, 0, order.getId(), System.currentTimeMillis(), "USER");
+                notifyRepository.save(notify);
+                // đếm số thống báo chưa đọc
+                Integer countNotify = notifyRepository.countAllByAckAndRole(0, "USER");
+                AlertNotify.senMessage("" + countNotify);
                 orderRepository.save(order);
             }
             response.put("code", 1);

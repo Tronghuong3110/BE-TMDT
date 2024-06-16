@@ -21,4 +21,6 @@ public class NotificationEntity {
     private Long orderId;
     @Column(name = "unix_time")
     private Long unixTime;
+    @Column(name = "role")
+    private String role;
 }
