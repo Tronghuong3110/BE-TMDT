@@ -31,7 +31,7 @@ public class NotificationService implements INotificationService {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             UserInfoUserDetails userInfoUserDetails = (UserInfoUserDetails) auth.getPrincipal();
             User user = userInfoRepository.findByUsernameAndDeleted(userInfoUserDetails.getUsername(), 0).orElse(new User());
-            List<NotificationEntity> listNotify = notifyRepository.findAllOrderByUnixTimeAndROle(user.getRoles().contains("ADMIN") ? "ADMIN" : "USER");
+            List<NotificationEntity> listNotify = notifyRepository.findAllOrderByUnixTimeAndROle(user.getRoles().contains("USER") ? "USER" : "ADMIN");
             List<NotificationDto> responses = new ArrayList<>();
             ModelMapper mapper = MapperUtil.configModelMapper();
             for(NotificationEntity notify : listNotify) {
