@@ -168,7 +168,7 @@ public class OrderService implements IOrderService {
                     notifyRepository.save(notify);
                     // đếm số thống báo chưa đọc
                     Integer countNotify = notifyRepository.countAllByAckAndRole(0, "ADMIN");
-                    AlertNotify.senMessage("" + countNotify);
+                    AlertNotify.senMessage("" + countNotify, "order");
                     response.put("code", 0);
                     response.put("message", "Đơn hàng của bạn có sản phẩm đã hết hàng !!");
                     response.put("order", null);
@@ -191,7 +191,7 @@ public class OrderService implements IOrderService {
             notifyRepository.save(notify);
             // đếm số thống báo chưa đọc
             Integer countNotify = notifyRepository.countAllByAckAndRole(0, "ADMIN");
-            AlertNotify.senMessage("" + countNotify);
+            AlertNotify.senMessage("" + countNotify, "order");
             BeanUtils.copyProperties(order, orderDto);
             response.put("code", 1);
             response.put("message", "Đặt hàng thành công !!");
@@ -220,7 +220,7 @@ public class OrderService implements IOrderService {
                     notifyRepository.save(notify);
                     // đếm số thống báo chưa đọc
                     Integer countNotify = notifyRepository.countAllByAckAndRole(0, "ADMIN");
-                    AlertNotify.senMessage("" + countNotify);
+                    AlertNotify.senMessage("" + countNotify, "order");
                     response.put("code", 0);
                     response.put("message", "Đơn hàng của bạn có sản phẩm đã hết hàng !!");
                     return response;
@@ -339,7 +339,7 @@ public class OrderService implements IOrderService {
                 // đếm số thống báo chưa đọc
                 Integer countNotify = notifyRepository.countAllByAckAndRole(0, "USER");
                 System.out.println();
-                AlertNotify.senMessage("" + countNotify);
+                AlertNotify.senMessage("" + countNotify, "buy");
                 orderRepository.save(order);
             }
             response.put("code", 1);

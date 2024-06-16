@@ -12,7 +12,7 @@ import java.util.List;
 public class AlertNotify {
     private static MqttClient client = null;
 
-    public static void senMessage(String message) {
+    public static void senMessage(String message, String topicSub) {
         try {
             MemoryPersistence persistence = new MemoryPersistence();
             MqttConnectOptions connectOptions = createOption();
@@ -20,13 +20,13 @@ public class AlertNotify {
                 client = new MqttClient(ConstVariable.BROKER_URL, "server", persistence);
                 client.connect(connectOptions);
             }
-            client.subscribe("buy", (topic, mess) -> {
+            client.subscribe(topicSub, (topic, mess) -> {
                 String res = new String(mess.getPayload());
                 System.out.println(res);
             });
             MqttMessage mqttMessage = new MqttMessage(message.getBytes());
             mqttMessage.setQos(2);
-            client.publish("buy", mqttMessage);
+            client.publish(topicSub, mqttMessage);
         }
         catch (Exception e) {
             e.printStackTrace();
