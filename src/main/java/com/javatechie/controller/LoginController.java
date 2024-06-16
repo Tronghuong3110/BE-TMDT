@@ -39,6 +39,7 @@ public class LoginController {
                 jsonObject.put("token", jwtService.generateToken(userDto.getUsername()));
                 jsonObject.put("role", userDetails.getRoles());
                 jsonObject.put("name", userDetails.getName());
+                jsonObject.put("username", userDetails.getUsername());
                 List<Long> products = userService.findAllProductBought(userDetails.getUserId());
                 jsonObject.put("listProductBought", products);
                 return ResponseEntity.ok(jsonObject);

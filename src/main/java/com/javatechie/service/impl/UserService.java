@@ -65,7 +65,7 @@ public class UserService implements IUserService {
                 // thêm mới topic vào db
                 String topic = "buy";
                 // thêm mới user vào broker
-                boolean addUserToBroker = ApiAddInfoToBroker.addUserToBroker(user.getUsername(), user.getPassword());
+                boolean addUserToBroker = ApiAddInfoToBroker.addUserToBroker(user.getUsername(), "1234");
                 if(!addUserToBroker) {
                     response.put("code", 0);
                     response.put("message", "Đăng ký tài khoản lỗi !!");
