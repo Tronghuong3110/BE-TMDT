@@ -14,7 +14,7 @@ public class ImageEntity {
     @Column(name = "path", columnDefinition = "text")
     private String path;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 }

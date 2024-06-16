@@ -28,7 +28,7 @@ public class ProductEntity {
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private BrandEntity brand;
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     private List<ImageEntity> images;
     @OneToMany(mappedBy = "product")
     private List<ReviewEntity> reviews;

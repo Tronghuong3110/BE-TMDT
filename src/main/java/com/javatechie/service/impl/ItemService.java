@@ -308,13 +308,6 @@ public class ItemService implements IItemService {
         try {
             ModelMapper mapper = MapperUtil.configModelMapper();
             ProductEntity product = productRepository.findById(productDto.getId()).orElse(new ProductEntity());
-            mapper.map(productDto, product);
-            // cập nhật thông tin về brand
-            if(!product.getBrand().getId().equals(brandId)) {
-                BrandEntity brand = brandRepository.findById(brandId).orElse(new BrandEntity());
-                product.setBrand(brand);
-            }
-            product = productRepository.save(product);
             // cập nhật ảnh
             if(productDto.getImages() != null) {
                 List<Integer> idOlds = productDto.getImages()
@@ -333,20 +326,25 @@ public class ItemService implements IItemService {
                 // thêm mới image mới hoặc update lại path của image cũ
                 for(ImageDto image : productDto.getImages()) {
                     ImageDto imageDto = new ImageDto();
-                    ImageEntity imageEntity = null;
                     if(image.getId() != null) {
-                        imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+//                        imageEntity = imageRepository.findById(image.getId()).orElse(new ImageEntity());
+                        continue;
                     }
-                    else {
-                        imageEntity = new ImageEntity();
-                    }
-                    mapper.map(image, imageEntity);
+                    ImageEntity imageEntity = new ImageEntity();
+                    imageEntity.setPath(imageDto.getPath());
                     imageEntity.setProduct(product);
                     imageEntity = imageRepository.save(imageEntity);
                     mapper.map(imageEntity, imageDto);
                     imageDtos.add(imageDto);
                 }
             }
+            mapper.map(productDto, product);
+            // cập nhật thông tin về brand
+            if(!product.getBrand().getId().equals(brandId)) {
+                BrandEntity brand = brandRepository.findById(brandId).orElse(new BrandEntity());
+                product.setBrand(brand);
+            }
+            product = productRepository.save(product);
             mapper.map(product, productDto);
             productDto.setComments(null);
             productDto.setReviews(null);
